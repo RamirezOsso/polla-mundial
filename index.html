@@ -849,6 +849,9 @@ function showPage(id) {
   document.querySelectorAll('.tab').forEach(function(t){
     if (t.getAttribute('onclick') && t.getAttribute('onclick').indexOf("'" + id + "'") !== -1) t.classList.add('on');
   });
+  // Hide float save unless on results page
+  var fs = document.getElementById('float-save');
+  if (fs) fs.style.display = (id === 'results') ? 'block' : 'none';
   var renders = {
     predict: renderPredict, ranking: renderRanking, account: renderAccount,
     setup: renderSetup, results: renderResults, allpreds: renderAllPreds,
@@ -1381,14 +1384,6 @@ async function saveResults() {
     setTimeout(function(){ btn.classList.remove('saved'); btn.textContent = '💾  Guardar resultados'; }, 2500);
   }
   showToast('✅ ' + Object.keys(updates).length + ' resultados guardados');
-}
-
-// Hide float save on page change
-var origShowPage = showPage;
-function showPage(id) {
-  var fs = document.getElementById('float-save');
-  if (fs && id !== 'results') fs.style.display = 'none';
-  origShowPage(id);
 }
 
 // ── ALL PREDS (admin) ──────────────────────────────────────────
