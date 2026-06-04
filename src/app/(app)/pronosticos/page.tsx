@@ -13,45 +13,53 @@ function GroupCard({ group, matches, predictions, onClick }: any) {
   const pct = total > 0 ? (done / total) * 100 : 0
   const isDone = done === total && total > 0
 
-  // Equipos del grupo
-  const teams = useMemo(() => {
-    const t: any[] = []
+  const standings = useMemo(() => {
+    const teams: Record<string, any> = {}
     matches.forEach((m: any) => {
-      if (!t.find((x: any) => x.id === m.home_team_id)) t.push(m.home_team)
-      if (!t.find((x: any) => x.id === m.away_team_id)) t.push(m.away_team)
+      if (!teams[m.home_team_id]) teams[m.home_team_id] = { ...m.home_team, pts: 0, gd: 0, gf: 0 }
+      if (!teams[m.away_team_id]) teams[m.away_team_id] = { ...m.away_team, pts: 0, gd: 0, gf: 0 }
+      const isFinished = m.status === 'finished'
+      const pred = predMap.get(m.id)
+      const h = isFinished ? m.home_score : pred?.home_score
+      const a = isFinished ? m.away_score : pred?.away_score
+      if (h == null || a == null) return
+      teams[m.home_team_id].gf += h
+      teams[m.away_team_id].gf += a
+      teams[m.home_team_id].gd += h - a
+      teams[m.away_team_id].gd += a - h
+      if (h > a) teams[m.home_team_id].pts += 3
+      else if (h < a) teams[m.away_team_id].pts += 3
+      else { teams[m.home_team_id].pts += 1; teams[m.away_team_id].pts += 1 }
     })
-    return t.slice(0, 4)
-  }, [matches])
+    return Object.values(teams).sort((a: any, b: any) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf)
+  }, [matches, predMap])
 
   return (
     <button onClick={onClick}
-      className={`w-full bg-gray-900 border rounded-2xl p-4 text-left transition-all hover:border-gray-500 hover:shadow-lg active:scale-95 ${
-        isDone ? 'border-green-500/40 bg-green-500/5' :
-        done > 0 ? 'border-yellow-500/30' : 'border-gray-800'
+      className={`w-full bg-gray-900 border rounded-2xl overflow-hidden text-left transition-all hover:border-gray-500 hover:shadow-lg active:scale-95 ${
+        isDone ? 'border-green-500/40' : done > 0 ? 'border-yellow-500/30' : 'border-gray-800'
       }`}>
-      <div className="flex items-center justify-between mb-3">
+      <div className={`flex items-center justify-between px-4 py-3 ${isDone ? 'bg-green-500/10' : 'bg-gray-800/50'}`}>
         <span className="text-base font-black text-white">Grupo {group}</span>
         <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
           isDone ? 'bg-green-500/20 text-green-400' :
           done > 0 ? 'bg-yellow-500/20 text-yellow-400' :
-          'bg-gray-700 text-gray-400'
+          'bg-gray-700/50 text-gray-400'
         }`}>
-          {isDone ? '✅ Completo' : `${done}/${total}`}
+          {isDone ? '✅ Listo' : `${done}/${total}`}
         </span>
       </div>
-
-      {/* Equipos */}
-      <div className="grid grid-cols-2 gap-1 mb-3">
-        {teams.map((team: any) => (
-          <div key={team?.id} className="flex items-center gap-1.5">
-            {team?.flag_url && <img src={team.flag_url} className="w-5 h-3.5 object-cover rounded flex-shrink-0"/>}
-            <span className="text-xs text-gray-300 truncate">{team?.name}</span>
+      <div className="px-3 py-2 space-y-1">
+        {standings.map((team: any, i: number) => (
+          <div key={team.id} className={`flex items-center gap-2 py-1 px-1 rounded-lg ${i < 2 ? 'bg-green-500/5' : ''}`}>
+            <span className={`text-xs font-bold w-4 text-center flex-shrink-0 ${i < 2 ? 'text-green-400' : 'text-gray-500'}`}>{i + 1}</span>
+            {team.flag_url && <img src={team.flag_url} className="w-6 h-4 object-cover rounded flex-shrink-0"/>}
+            <span className={`text-xs flex-1 truncate ${i < 2 ? 'text-white font-semibold' : 'text-gray-400'}`}>{team.short_name}</span>
+            <span className={`text-xs font-black w-5 text-right flex-shrink-0 ${i < 2 ? 'text-white' : 'text-gray-500'}`}>{team.pts}</span>
           </div>
         ))}
       </div>
-
-      {/* Barra de progreso */}
-      <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+      <div className="h-1 bg-gray-800 mx-3 mb-3 rounded-full overflow-hidden">
         <div className={`h-full rounded-full transition-all duration-500 ${isDone ? 'bg-green-500' : 'bg-yellow-500'}`}
           style={{ width: `${pct}%` }}/>
       </div>
