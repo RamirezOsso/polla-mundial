@@ -7,7 +7,7 @@ import { usePredictions } from '@/hooks/usePredictions'
 const GROUPS = ['A','B','C','D','E','F','G','H','I','J','K','L']
 
 function GroupCard({ group, matches, predictions, onClick }: any) {
-  const predMap = new Map(predictions.map((p: any) => [p.match_id, p]))
+  const predMap = new Map<string, any>(predictions.map((p: any) => [p.match_id, p]))
   const done = matches.filter((m: any) => predMap.has(m.id)).length
   const total = matches.length
   const pct = total > 0 ? (done / total) * 100 : 0
@@ -70,7 +70,7 @@ function GroupCard({ group, matches, predictions, onClick }: any) {
 }
 
 function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
-  const predMap = new Map(predictions.map((p: any) => [p.match_id, p]))
+  const predMap = new Map<string, any>(predictions.map((p: any) => [p.match_id, p]))
   const [scores, setScores] = useState<Record<string, {h: number|string, a: number|string}>>(() => {
     const init: Record<string, any> = {}
     matches.forEach((m: any) => {
