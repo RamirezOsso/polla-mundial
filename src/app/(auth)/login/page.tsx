@@ -1,11 +1,14 @@
+cat > "src/app/(auth)/login/page.tsx" << 'EOF'
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-const ADMIN_USER = 'bro94'
-const ADMIN_PASS = '12345678'
+const ADMIN_USER = 'admin'
+const ADMIN_PASS = 'Admin2026$'
+const ADMIN_EMAIL = 'brayanramirezosorio@gmail.com'
+const ADMIN_SUPABASE_PASS = '12345678'
 
 export default function LoginPage() {
   const [tab, setTab] = useState<'user' | 'admin'>('user')
@@ -37,8 +40,8 @@ export default function LoginPage() {
       return
     }
     const { error } = await supabase.auth.signInWithPassword({
-      email: 'brayanramirezosorio@gmail.com',
-      password: adminPass,
+      email: ADMIN_EMAIL,
+      password: ADMIN_SUPABASE_PASS,
     })
     if (error) { setError(error.message); setLoading(false) }
     else router.push('/admin')
@@ -53,9 +56,7 @@ export default function LoginPage() {
           <h1 className="text-3xl font-black gradient-text">Polla Mundial</h1>
           <p className="text-gray-400 mt-2">FIFA World Cup 2026</p>
         </div>
-
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 shadow-2xl">
-          {/* Tabs */}
           <div className="flex gap-1 p-1 bg-gray-800 rounded-xl mb-6">
             <button onClick={() => { setTab('user'); setError('') }}
               className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${tab === 'user' ? 'bg-green-600 text-white' : 'text-gray-400 hover:text-white'}`}>
@@ -71,7 +72,6 @@ export default function LoginPage() {
             <div className="bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl p-3 mb-4 text-sm">{error}</div>
           )}
 
-          {/* Participante */}
           {tab === 'user' && (
             <form onSubmit={handleUserLogin} className="space-y-4">
               <div className="space-y-1">
@@ -97,20 +97,19 @@ export default function LoginPage() {
             </form>
           )}
 
-          {/* Administrador */}
           {tab === 'admin' && (
             <form onSubmit={handleAdminLogin} className="space-y-4">
               <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-3 text-center mb-2">
                 <p className="text-purple-300 text-xs">Acceso exclusivo para administradores</p>
               </div>
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-300">Usuario admin</label>
+                <label className="text-sm font-medium text-gray-300">Usuario</label>
                 <input type="text" value={adminUser} onChange={e => setAdminUser(e.target.value)}
-                  placeholder="usuario" required
+                  placeholder="usuario admin" required
                   className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-purple-500" />
               </div>
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-300">Contraseña admin</label>
+                <label className="text-sm font-medium text-gray-300">Contraseña</label>
                 <input type="password" value={adminPass} onChange={e => setAdminPass(e.target.value)}
                   placeholder="••••••••" required
                   className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-purple-500" />
@@ -126,3 +125,4 @@ export default function LoginPage() {
     </div>
   )
 }
+EOF
