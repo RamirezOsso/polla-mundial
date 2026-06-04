@@ -124,4 +124,3 @@ export default function LoginPage() {
     </div>
   )
 }
-EOF
