@@ -1,4 +1,3 @@
-cat > "src/app/(auth)/login/page.tsx" << 'EOF'
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
