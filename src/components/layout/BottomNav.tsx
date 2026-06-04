@@ -5,10 +5,9 @@ import { cn } from '@/lib/utils'
 
 const items = [
   { href: '/dashboard', icon: '🏠', label: 'Inicio' },
-  { href: '/matches', icon: '⚽', label: 'Partidos' },
-  { href: '/bracket', icon: '🏆', label: 'Bracket' },
+  { href: '/pronosticos', icon: '⚽', label: 'Pronósticos' },
+  { href: '/camino', icon: '🏆', label: 'Campeón' },
   { href: '/ranking', icon: '📊', label: 'Ranking' },
-  { href: '/profile', icon: '👤', label: 'Perfil' },
 ]
 
 export function BottomNav() {
@@ -19,7 +18,7 @@ export function BottomNav() {
         {items.map(item => (
           <Link key={item.href} href={item.href}
             className={cn('flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-all',
-              pathname === item.href ? 'text-green-400' : 'text-gray-500 hover:text-gray-300'
+              pathname.startsWith(item.href) ? 'text-green-400' : 'text-gray-500 hover:text-gray-300'
             )}>
             <span className="text-xl">{item.icon}</span>
             <span className="text-xs font-medium">{item.label}</span>
