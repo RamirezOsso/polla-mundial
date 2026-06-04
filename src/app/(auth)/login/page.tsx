@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 const ADMIN_USER = 'bro94'
-const ADMIN_PASS = 'RRMundial$2026'
+const ADMIN_PASS = '12345678'
 
 export default function LoginPage() {
   const [tab, setTab] = useState<'user' | 'admin'>('user')
