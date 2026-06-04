@@ -51,7 +51,7 @@ function GroupCard({ group, matches, predictions, onClick }: any) {
       </div>
       <div className="px-3 py-2 space-y-1">
         {standings.map((team: any, i: number) => (
-          <div key={team.id} className={`flex items-center gap-2 py-1 px-1 rounded-lg ${i < 2 ? 'bg-green-500/5' : ''}`}>
+          <div key={team.id} className={`flex items-center gap-2 py-1.5 px-2 rounded-lg ${i < 2 ? 'bg-green-500/5' : ''}`}>
             <span className={`text-xs font-bold w-4 text-center flex-shrink-0 ${i < 2 ? 'text-green-400' : 'text-gray-500'}`}>{i + 1}</span>
             {team.flag_url && <img src={team.flag_url} className="w-6 h-4 object-cover rounded flex-shrink-0"/>}
             <span className={`text-xs flex-1 truncate ${i < 2 ? 'text-white font-semibold' : 'text-gray-400'}`}>{team.short_name}</span>
@@ -100,10 +100,8 @@ function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
       <div className="flex items-center gap-3">
-        <button onClick={onBack}
-          className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors">
+        <button onClick={onBack} className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors">
           <span>←</span>
           <span className="text-sm">Grupos</span>
         </button>
@@ -113,17 +111,16 @@ function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
         </div>
       </div>
 
-      {/* Partidos */}
       <div className="space-y-3">
         {matches.map((m: any) => {
           const s = scores[m.id]
           const isLocked = m.is_locked || m.status !== 'scheduled'
           const isFinished = m.status === 'finished'
           const hasPred = s?.h !== '' && s?.a !== ''
+          const calcPred = predMap.get(m.id)
 
           return (
             <div key={m.id} className={`bg-gray-900 border rounded-2xl p-4 ${hasPred ? 'border-green-500/20' : 'border-gray-800'}`}>
-              {/* Fecha */}
               <p className="text-xs text-gray-500 mb-3 text-center">
                 {new Date(m.match_date).toLocaleString('es-CO', {
                   timeZone: 'America/Bogota', day: '2-digit', month: 'short',
@@ -133,13 +130,11 @@ function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
               </p>
 
               <div className="flex items-center gap-3">
-                {/* Local */}
                 <div className="flex items-center gap-2 flex-1 justify-end">
                   {m.home_team?.flag_url && <img src={m.home_team.flag_url} className="w-7 h-5 object-cover rounded"/>}
                   <span className="font-bold text-white text-sm text-right">{m.home_team?.name}</span>
                 </div>
 
-                {/* Score */}
                 {isFinished ? (
                   <div className="px-3 py-1.5 bg-gray-800 rounded-xl text-center min-w-[80px]">
                     <span className="text-xl font-black text-white">{m.home_score}-{m.away_score}</span>
@@ -152,7 +147,6 @@ function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    {/* Input local */}
                     <div className="flex flex-col items-center gap-1">
                       <input type="number" min="0" max="20" value={s?.h ?? ''}
                         onChange={e => setScores(p => ({...p, [m.id]: {...p[m.id], h: e.target.value === '' ? '' : Number(e.target.value)}}))}
@@ -168,7 +162,6 @@ function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
                       </div>
                     </div>
                     <span className="text-2xl font-black text-gray-600">:</span>
-                    {/* Input visitante */}
                     <div className="flex flex-col items-center gap-1">
                       <input type="number" min="0" max="20" value={s?.a ?? ''}
                         onChange={e => setScores(p => ({...p, [m.id]: {...p[m.id], a: e.target.value === '' ? '' : Number(e.target.value)}}))}
@@ -186,22 +179,20 @@ function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
                   </div>
                 )}
 
-                {/* Visitante */}
                 <div className="flex items-center gap-2 flex-1">
                   <span className="font-bold text-white text-sm">{m.away_team?.name}</span>
                   {m.away_team?.flag_url && <img src={m.away_team.flag_url} className="w-7 h-5 object-cover rounded"/>}
                 </div>
               </div>
 
-              {/* Puntos obtenidos */}
-              {isFinished && predMap.get(m.id)?.is_calculated && (
+              {isFinished && calcPred?.is_calculated && (
                 <div className="mt-2 text-center">
                   <span className={`text-sm font-bold px-3 py-1 rounded-full ${
-                    predMap.get(m.id)?.points_earned === 5 ? 'bg-green-500/20 text-green-400' :
-                    predMap.get(m.id)?.points_earned >= 3 ? 'bg-blue-500/20 text-blue-400' :
+                    calcPred.points_earned === 5 ? 'bg-green-500/20 text-green-400' :
+                    calcPred.points_earned >= 3 ? 'bg-blue-500/20 text-blue-400' :
                     'bg-gray-700 text-gray-400'
                   }`}>
-                    +{predMap.get(m.id)?.points_earned} pts
+                    +{calcPred.points_earned} pts
                   </span>
                 </div>
               )}
@@ -210,7 +201,6 @@ function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
         })}
       </div>
 
-      {/* Botón guardar */}
       {matches.some((m: any) => !m.is_locked && m.status === 'scheduled') && (
         <button onClick={handleSave} disabled={saving || done === 0}
           className="w-full py-4 bg-gradient-to-r from-green-600 to-green-500 text-white font-black rounded-2xl text-base disabled:opacity-50 transition-all active:scale-95">
@@ -243,7 +233,7 @@ export default function PronosticosPage() {
         <div className="h-8 w-48 bg-gray-800 animate-pulse rounded-xl"/>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {Array.from({length: 12}).map((_, i) => (
-            <div key={i} className="h-32 bg-gray-800 animate-pulse rounded-2xl"/>
+            <div key={i} className="h-36 bg-gray-800 animate-pulse rounded-2xl"/>
           ))}
         </div>
       </div>
@@ -267,15 +257,14 @@ export default function PronosticosPage() {
       <div>
         <h1 className="text-2xl font-black text-white">⚽ Pronósticos</h1>
         <p className="text-gray-400 text-sm mt-1">
-          {totalDone}/12 grupos completos · Toca un grupo para ingresar tus pronósticos
+          {totalDone}/12 grupos completos · Toca un grupo para ingresar
         </p>
       </div>
 
-      {/* Progreso general */}
       <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm text-gray-400">Progreso fase de grupos</span>
-          <span className="text-sm font-bold text-white">{totalDone}/12 grupos</span>
+          <span className="text-sm font-bold text-white">{totalDone}/12</span>
         </div>
         <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
           <div className="h-full bg-gradient-to-r from-green-600 to-green-400 rounded-full transition-all duration-500"
@@ -283,12 +272,11 @@ export default function PronosticosPage() {
         </div>
         {totalDone === 12 && (
           <p className="text-xs text-green-400 mt-2 text-center">
-            ✅ ¡Todos los grupos completos! Ve a <a href="/camino" className="font-bold underline">Camino al Campeón</a>
+            ✅ ¡Grupos completos! Ve a <a href="/camino" className="font-bold underline">Camino al Campeón</a>
           </p>
         )}
       </div>
 
-      {/* Grid de grupos */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         {GROUPS.map(g => (
           <GroupCard
