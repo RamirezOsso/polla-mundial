@@ -39,9 +39,7 @@ function GroupCard({ group, matches, predictions, onClick }: any) {
         done > 0 ? 'border-yellow-400 dark:border-yellow-500/30' :
         'border-gray-200 dark:border-gray-800'
       }`}>
-      <div className={`flex items-center justify-between px-4 py-3 ${
-        isDone ? 'bg-green-50 dark:bg-green-500/10' : 'bg-gray-50 dark:bg-gray-800/50'
-      }`}>
+      <div className={`flex items-center justify-between px-4 py-3 ${isDone ? 'bg-green-50 dark:bg-green-500/10' : 'bg-gray-50 dark:bg-gray-800/50'}`}>
         <span className="text-base font-black text-gray-900 dark:text-white">Grupo {group}</span>
         <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
           isDone ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400' :
@@ -103,7 +101,7 @@ function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
         </button>
         <div className="flex-1">
           <h2 className="text-xl font-black text-gray-900 dark:text-white">Grupo {group}</h2>
-          <p className="text-xs text-gray-500">{done}/{matches.length} pronósticos</p>
+          <p className="text-xs text-gray-500">{done}/{matches.length} pronósticos ingresados</p>
         </div>
       </div>
 
@@ -117,64 +115,90 @@ function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
 
           return (
             <div key={m.id} className={`bg-white dark:bg-gray-900 border rounded-2xl p-4 ${hasPred ? 'border-green-300 dark:border-green-500/20' : 'border-gray-200 dark:border-gray-800'}`}>
+              {/* Fecha */}
               <p className="text-xs text-gray-400 mb-3 text-center">
                 {new Date(m.match_date).toLocaleString('es-CO', { timeZone: 'America/Bogota', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                 {isLocked && <span className="ml-2 text-yellow-500">🔒</span>}
               </p>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 flex-1 justify-end">
-                  {m.home_team?.flag_url && <img src={m.home_team.flag_url} className="w-7 h-5 object-cover rounded"/>}
-                  <span className="font-bold text-gray-900 dark:text-white text-sm text-right">{m.home_team?.name}</span>
-                </div>
-                {isFinished ? (
-                  <div className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-xl text-center min-w-[80px]">
+
+              {isFinished ? (
+                /* Partido finalizado */
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-1 justify-end">
+                    {m.home_team?.flag_url && <img src={m.home_team.flag_url} className="w-7 h-5 object-cover rounded flex-shrink-0"/>}
+                    <span className="font-bold text-gray-900 dark:text-white text-sm text-right leading-tight">{m.home_team?.name}</span>
+                  </div>
+                  <div className="px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-center flex-shrink-0 min-w-[72px]">
                     <span className="text-xl font-black text-gray-900 dark:text-white">{m.home_score}-{m.away_score}</span>
                   </div>
-                ) : isLocked ? (
-                  <div className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-xl text-center min-w-[80px]">
-                    {hasPred ? <span className="text-sm font-black text-blue-500">{s.h}-{s.a}</span>
-                      : <span className="text-xs text-gray-400">🔒</span>}
+                  <div className="flex items-center gap-2 flex-1">
+                    <span className="font-bold text-gray-900 dark:text-white text-sm leading-tight">{m.away_team?.name}</span>
+                    {m.away_team?.flag_url && <img src={m.away_team.flag_url} className="w-7 h-5 object-cover rounded flex-shrink-0"/>}
                   </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <div className="flex flex-col items-center gap-1">
-                      <input type="number" min="0" max="20" value={s?.h ?? ''}
-                        onChange={e => setScores(p => ({...p, [m.id]: {...p[m.id], h: e.target.value === '' ? '' : Number(e.target.value)}}))}
-                        className="w-14 h-14 text-center text-2xl font-black bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-green-500"
-                        placeholder="?"/>
-                      <div className="flex gap-0.5">
-                        {[0,1,2,3,4,5].map(n => (
-                          <button key={n} onClick={() => setScores(p => ({...p, [m.id]: {...p[m.id], h: n}}))}
-                            className={`w-6 h-5 rounded text-xs font-bold transition-all ${s?.h===n ? 'bg-green-600 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-500 hover:bg-gray-300 dark:hover:bg-gray-700'}`}>
-                            {n}
-                          </button>
-                        ))}
-                      </div>
+                </div>
+              ) : isLocked ? (
+                /* Partido bloqueado */
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-1 justify-end">
+                    {m.home_team?.flag_url && <img src={m.home_team.flag_url} className="w-7 h-5 object-cover rounded flex-shrink-0"/>}
+                    <span className="font-bold text-gray-900 dark:text-white text-sm text-right leading-tight">{m.home_team?.name}</span>
+                  </div>
+                  <div className="px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-center flex-shrink-0 min-w-[72px]">
+                    {hasPred ? <span className="text-lg font-black text-blue-500">{s.h}-{s.a}</span>
+                      : <span className="text-sm text-gray-400">🔒</span>}
+                  </div>
+                  <div className="flex items-center gap-2 flex-1">
+                    <span className="font-bold text-gray-900 dark:text-white text-sm leading-tight">{m.away_team?.name}</span>
+                    {m.away_team?.flag_url && <img src={m.away_team.flag_url} className="w-7 h-5 object-cover rounded flex-shrink-0"/>}
+                  </div>
+                </div>
+              ) : (
+                /* Partido para predecir — layout vertical en móvil */
+                <div className="space-y-3">
+                  {/* Equipo local */}
+                  <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl px-3 py-2">
+                    {m.home_team?.flag_url && <img src={m.home_team.flag_url} className="w-8 h-5 object-cover rounded flex-shrink-0"/>}
+                    <span className="font-bold text-gray-900 dark:text-white text-sm flex-1">{m.home_team?.name}</span>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {[0,1,2,3,4,5].map(n => (
+                        <button key={n} onClick={() => setScores(p => ({...p, [m.id]: {...p[m.id], h: n}}))}
+                          className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${s?.h===n ? 'bg-green-600 text-white shadow-md' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}>
+                          {n}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Marcador actual */}
+                  <div className="flex items-center justify-center gap-3">
+                    <div className="text-3xl font-black text-gray-900 dark:text-white w-12 h-12 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-xl">
+                      {s?.h !== '' ? s?.h : '?'}
                     </div>
                     <span className="text-2xl font-black text-gray-300 dark:text-gray-600">:</span>
-                    <div className="flex flex-col items-center gap-1">
-                      <input type="number" min="0" max="20" value={s?.a ?? ''}
-                        onChange={e => setScores(p => ({...p, [m.id]: {...p[m.id], a: e.target.value === '' ? '' : Number(e.target.value)}}))}
-                        className="w-14 h-14 text-center text-2xl font-black bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-green-500"
-                        placeholder="?"/>
-                      <div className="flex gap-0.5">
-                        {[0,1,2,3,4,5].map(n => (
-                          <button key={n} onClick={() => setScores(p => ({...p, [m.id]: {...p[m.id], a: n}}))}
-                            className={`w-6 h-5 rounded text-xs font-bold transition-all ${s?.a===n ? 'bg-green-600 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-500 hover:bg-gray-300 dark:hover:bg-gray-700'}`}>
-                            {n}
-                          </button>
-                        ))}
-                      </div>
+                    <div className="text-3xl font-black text-gray-900 dark:text-white w-12 h-12 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-xl">
+                      {s?.a !== '' ? s?.a : '?'}
                     </div>
                   </div>
-                )}
-                <div className="flex items-center gap-2 flex-1">
-                  <span className="font-bold text-gray-900 dark:text-white text-sm">{m.away_team?.name}</span>
-                  {m.away_team?.flag_url && <img src={m.away_team.flag_url} className="w-7 h-5 object-cover rounded"/>}
+
+                  {/* Equipo visitante */}
+                  <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl px-3 py-2">
+                    {m.away_team?.flag_url && <img src={m.away_team.flag_url} className="w-8 h-5 object-cover rounded flex-shrink-0"/>}
+                    <span className="font-bold text-gray-900 dark:text-white text-sm flex-1">{m.away_team?.name}</span>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {[0,1,2,3,4,5].map(n => (
+                        <button key={n} onClick={() => setScores(p => ({...p, [m.id]: {...p[m.id], a: n}}))}
+                          className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${s?.a===n ? 'bg-green-600 text-white shadow-md' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}>
+                          {n}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Puntos obtenidos */}
               {isFinished && calcPred?.is_calculated && (
-                <div className="mt-2 text-center">
+                <div className="mt-3 text-center">
                   <span className={`text-sm font-bold px-3 py-1 rounded-full ${
                     calcPred.points_earned === 5 ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400' :
                     calcPred.points_earned >= 3 ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400' :
@@ -189,7 +213,7 @@ function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
 
       {matches.some((m: any) => !m.is_locked && m.status === 'scheduled') && (
         <button onClick={handleSave} disabled={saving || done === 0}
-          className="w-full py-4 bg-gradient-to-r from-green-600 to-green-500 text-white font-black rounded-2xl text-base disabled:opacity-50 transition-all active:scale-95">
+          className="w-full py-4 bg-gradient-to-r from-green-600 to-green-500 text-white font-black rounded-2xl text-base disabled:opacity-50 transition-all active:scale-95 shadow-lg shadow-green-500/25">
           {saved ? '✅ ¡Guardado!' : saving ? 'Guardando...' : `💾 Guardar Grupo ${group}`}
         </button>
       )}
@@ -233,7 +257,7 @@ export default function PronosticosPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-black text-gray-900 dark:text-white">⚽ Pronósticos</h1>
-        <p className="text-gray-500 text-sm mt-1">{totalDone}/12 grupos completos · Toca un grupo para ingresar</p>
+        <p className="text-gray-500 text-sm mt-1">{totalDone}/12 grupos completos</p>
       </div>
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4">
         <div className="flex items-center justify-between mb-2">
