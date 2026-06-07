@@ -6,6 +6,30 @@ import { usePredictions } from '@/hooks/usePredictions'
 
 const GROUPS = ['A','B','C','D','E','F','G','H','I','J','K','L']
 
+function ScoreInput({ value, onChange }: { value: number|string, onChange: (n: number|string) => void }) {
+  return (
+    <input
+      type="number"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      min={0}
+      max={20}
+      value={value}
+      onChange={e => {
+        const v = e.target.value
+        if (v === '') { onChange(''); return }
+        const n = parseInt(v)
+        if (isNaN(n)) return
+        if (n < 0) { onChange(0); return }
+        if (n > 20) { onChange(20); return }
+        onChange(n)
+      }}
+      placeholder="?"
+      className="w-16 h-16 text-center text-3xl font-black bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-2xl text-gray-900 dark:text-white focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/30 transition-all"
+    />
+  )
+}
+
 function GroupCard({ group, matches, predictions, onClick }: any) {
   const predMap = new Map<string, any>(predictions.map((p: any) => [p.match_id, p]))
   const done = matches.filter((m: any) => predMap.has(m.id)).length
@@ -88,10 +112,13 @@ function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
     }
     setSaving(false)
     setSaved(true)
-    setTimeout(() => { setSaved(false); onBack() }, 1200)
+    setTimeout(() => { setSaved(false); onBack() }, 1500)
   }
 
-  const done = matches.filter((m: any) => { const s = scores[m.id]; return s?.h !== '' && s?.a !== '' }).length
+  const done = matches.filter((m: any) => {
+    const s = scores[m.id]
+    return s?.h !== '' && s?.a !== ''
+  }).length
 
   return (
     <div className="space-y-4">
@@ -115,95 +142,74 @@ function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
 
           return (
             <div key={m.id} className={`bg-white dark:bg-gray-900 border rounded-2xl p-4 ${hasPred ? 'border-green-300 dark:border-green-500/20' : 'border-gray-200 dark:border-gray-800'}`}>
-              {/* Fecha */}
-              <p className="text-xs text-gray-400 mb-3 text-center">
-                {new Date(m.match_date).toLocaleString('es-CO', { timeZone: 'America/Bogota', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+              <p className="text-xs text-gray-400 mb-4 text-center">
+                {new Date(m.match_date).toLocaleString('es-CO', { timeZone: 'America/Bogota', weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                 {isLocked && <span className="ml-2 text-yellow-500">🔒</span>}
               </p>
 
               {isFinished ? (
-                /* Partido finalizado */
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-2 flex-1 justify-end">
-                    {m.home_team?.flag_url && <img src={m.home_team.flag_url} className="w-7 h-5 object-cover rounded flex-shrink-0"/>}
-                    <span className="font-bold text-gray-900 dark:text-white text-sm text-right leading-tight">{m.home_team?.name}</span>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 flex-1 justify-end">
+                      {m.home_team?.flag_url && <img src={m.home_team.flag_url} className="w-8 h-5 object-cover rounded"/>}
+                      <span className="font-bold text-gray-900 dark:text-white text-sm text-right leading-tight">{m.home_team?.name}</span>
+                    </div>
+                    <div className="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-center min-w-[80px]">
+                      <span className="text-2xl font-black text-gray-900 dark:text-white">{m.home_score}-{m.away_score}</span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-1">
+                      <span className="font-bold text-gray-900 dark:text-white text-sm leading-tight">{m.away_team?.name}</span>
+                      {m.away_team?.flag_url && <img src={m.away_team.flag_url} className="w-8 h-5 object-cover rounded"/>}
+                    </div>
                   </div>
-                  <div className="px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-center flex-shrink-0 min-w-[72px]">
-                    <span className="text-xl font-black text-gray-900 dark:text-white">{m.home_score}-{m.away_score}</span>
-                  </div>
-                  <div className="flex items-center gap-2 flex-1">
-                    <span className="font-bold text-gray-900 dark:text-white text-sm leading-tight">{m.away_team?.name}</span>
-                    {m.away_team?.flag_url && <img src={m.away_team.flag_url} className="w-7 h-5 object-cover rounded flex-shrink-0"/>}
-                  </div>
+                  {calcPred?.is_calculated && (
+                    <div className="text-center mt-2">
+                      <span className={`text-sm font-bold px-3 py-1 rounded-full ${
+                        calcPred.points_earned === 5 ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400' :
+                        calcPred.points_earned >= 3 ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400' :
+                        'bg-gray-100 dark:bg-gray-700 text-gray-500'
+                      }`}>+{calcPred.points_earned} pts · Mi pronóstico: {calcPred.home_score}-{calcPred.away_score}</span>
+                    </div>
+                  )}
                 </div>
               ) : isLocked ? (
-                /* Partido bloqueado */
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2 flex-1 justify-end">
-                    {m.home_team?.flag_url && <img src={m.home_team.flag_url} className="w-7 h-5 object-cover rounded flex-shrink-0"/>}
-                    <span className="font-bold text-gray-900 dark:text-white text-sm text-right leading-tight">{m.home_team?.name}</span>
+                    {m.home_team?.flag_url && <img src={m.home_team.flag_url} className="w-8 h-5 object-cover rounded"/>}
+                    <span className="font-bold text-gray-900 dark:text-white text-sm">{m.home_team?.name}</span>
                   </div>
-                  <div className="px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-center flex-shrink-0 min-w-[72px]">
-                    {hasPred ? <span className="text-lg font-black text-blue-500">{s.h}-{s.a}</span>
+                  <div className="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-center min-w-[80px]">
+                    {hasPred
+                      ? <span className="text-xl font-black text-blue-500">{s.h}-{s.a}</span>
                       : <span className="text-sm text-gray-400">🔒</span>}
                   </div>
                   <div className="flex items-center gap-2 flex-1">
-                    <span className="font-bold text-gray-900 dark:text-white text-sm leading-tight">{m.away_team?.name}</span>
-                    {m.away_team?.flag_url && <img src={m.away_team.flag_url} className="w-7 h-5 object-cover rounded flex-shrink-0"/>}
+                    <span className="font-bold text-gray-900 dark:text-white text-sm">{m.away_team?.name}</span>
+                    {m.away_team?.flag_url && <img src={m.away_team.flag_url} className="w-8 h-5 object-cover rounded"/>}
                   </div>
                 </div>
               ) : (
-                /* Partido para predecir — layout vertical en móvil */
                 <div className="space-y-3">
-                  {/* Equipo local */}
-                  <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl px-3 py-2">
+                  {/* Local */}
+                  <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl px-4 py-3">
                     {m.home_team?.flag_url && <img src={m.home_team.flag_url} className="w-8 h-5 object-cover rounded flex-shrink-0"/>}
                     <span className="font-bold text-gray-900 dark:text-white text-sm flex-1">{m.home_team?.name}</span>
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      {[0,1,2,3,4,5].map(n => (
-                        <button key={n} onClick={() => setScores(p => ({...p, [m.id]: {...p[m.id], h: n}}))}
-                          className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${s?.h===n ? 'bg-green-600 text-white shadow-md' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}>
-                          {n}
-                        </button>
-                      ))}
-                    </div>
+                    <ScoreInput value={s?.h ?? ''} onChange={v => setScores(p => ({...p, [m.id]: {...p[m.id], h: v}}))}/>
                   </div>
 
-                  {/* Marcador actual */}
+                  {/* VS */}
                   <div className="flex items-center justify-center gap-3">
-                    <div className="text-3xl font-black text-gray-900 dark:text-white w-12 h-12 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-xl">
-                      {s?.h !== '' ? s?.h : '?'}
-                    </div>
-                    <span className="text-2xl font-black text-gray-300 dark:text-gray-600">:</span>
-                    <div className="text-3xl font-black text-gray-900 dark:text-white w-12 h-12 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-xl">
-                      {s?.a !== '' ? s?.a : '?'}
-                    </div>
+                    <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"/>
+                    <span className="text-xs font-bold text-gray-400 px-2">VS</span>
+                    <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"/>
                   </div>
 
-                  {/* Equipo visitante */}
-                  <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl px-3 py-2">
+                  {/* Visitante */}
+                  <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl px-4 py-3">
                     {m.away_team?.flag_url && <img src={m.away_team.flag_url} className="w-8 h-5 object-cover rounded flex-shrink-0"/>}
                     <span className="font-bold text-gray-900 dark:text-white text-sm flex-1">{m.away_team?.name}</span>
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      {[0,1,2,3,4,5].map(n => (
-                        <button key={n} onClick={() => setScores(p => ({...p, [m.id]: {...p[m.id], a: n}}))}
-                          className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${s?.a===n ? 'bg-green-600 text-white shadow-md' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}>
-                          {n}
-                        </button>
-                      ))}
-                    </div>
+                    <ScoreInput value={s?.a ?? ''} onChange={v => setScores(p => ({...p, [m.id]: {...p[m.id], a: v}}))}/>
                   </div>
-                </div>
-              )}
-
-              {/* Puntos obtenidos */}
-              {isFinished && calcPred?.is_calculated && (
-                <div className="mt-3 text-center">
-                  <span className={`text-sm font-bold px-3 py-1 rounded-full ${
-                    calcPred.points_earned === 5 ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400' :
-                    calcPred.points_earned >= 3 ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400' :
-                    'bg-gray-100 dark:bg-gray-700 text-gray-500'
-                  }`}>+{calcPred.points_earned} pts</span>
                 </div>
               )}
             </div>
@@ -213,7 +219,10 @@ function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
 
       {matches.some((m: any) => !m.is_locked && m.status === 'scheduled') && (
         <button onClick={handleSave} disabled={saving || done === 0}
-          className="w-full py-4 bg-gradient-to-r from-green-600 to-green-500 text-white font-black rounded-2xl text-base disabled:opacity-50 transition-all active:scale-95 shadow-lg shadow-green-500/25">
+          className={`w-full py-4 font-black rounded-2xl text-base disabled:opacity-50 transition-all active:scale-95 shadow-lg ${
+            saved ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 border border-green-300' :
+            'bg-gradient-to-r from-green-600 to-green-500 text-white shadow-green-500/25'
+          }`}>
           {saved ? '✅ ¡Guardado!' : saving ? 'Guardando...' : `💾 Guardar Grupo ${group}`}
         </button>
       )}
@@ -257,7 +266,7 @@ export default function PronosticosPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-black text-gray-900 dark:text-white">⚽ Pronósticos</h1>
-        <p className="text-gray-500 text-sm mt-1">{totalDone}/12 grupos completos</p>
+        <p className="text-gray-500 text-sm mt-1">{totalDone}/12 grupos completos · Toca un grupo para ingresar</p>
       </div>
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4">
         <div className="flex items-center justify-between mb-2">
