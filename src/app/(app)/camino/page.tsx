@@ -71,21 +71,27 @@ function getLoser(predMap: Map<string, any>, match: any, homeTeam: any, awayTeam
   return winner.id === homeTeam?.id ? awayTeam : homeTeam
 }
 
-function ScoreSelector({ value, onChange }: { value: number|string, onChange: (n: number) => void }) {
+function ScoreInput({ value, onChange }: { value: number|string, onChange: (n: number|string) => void }) {
   return (
-    <div className="flex flex-col items-center gap-1">
-      <div className="w-12 h-12 flex items-center justify-center bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-xl text-2xl font-black text-gray-900 dark:text-white">
-        {value !== '' ? value : '?'}
-      </div>
-      <div className="flex gap-0.5">
-        {[0,1,2,3,4,5].map(n => (
-          <button key={n} onClick={() => onChange(n)}
-            className={`w-7 h-6 rounded-lg text-xs font-bold transition-all ${value===n ? 'bg-green-600 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-500 hover:bg-gray-300 dark:hover:bg-gray-700'}`}>
-            {n}
-          </button>
-        ))}
-      </div>
-    </div>
+    <input
+      type="number"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      min={0}
+      max={20}
+      value={value}
+      onChange={e => {
+        const v = e.target.value
+        if (v === '') { onChange(''); return }
+        const n = parseInt(v)
+        if (isNaN(n)) return
+        if (n < 0) { onChange(0); return }
+        if (n > 20) { onChange(20); return }
+        onChange(n)
+      }}
+      placeholder="?"
+      className="w-16 h-16 text-center text-3xl font-black bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-2xl text-gray-900 dark:text-white focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/30 transition-all"
+    />
   )
 }
 
@@ -163,27 +169,31 @@ function MatchCard({ match, homeTeam, awayTeam, prediction, onSave, pts, isLocke
           </div>
         </div>
       ) : (
-        <div className="p-3 space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 flex-1 justify-end">
-              {homeTeam?.flag_url && <img src={homeTeam.flag_url} className="w-7 h-5 object-cover rounded flex-shrink-0"/>}
-              <span className={`text-sm font-bold truncate ${winner?.id === homeTeam?.id ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
-                {homeTeam?.short_name}{winner?.id === homeTeam?.id && ' ✓'}
-              </span>
-            </div>
-            <span className="text-gray-300 dark:text-gray-600 text-xs">vs</span>
-            <div className="flex items-center gap-2 flex-1">
-              <span className={`text-sm font-bold truncate ${winner?.id === awayTeam?.id ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
-                {winner?.id === awayTeam?.id && '✓ '}{awayTeam?.short_name}
-              </span>
-              {awayTeam?.flag_url && <img src={awayTeam.flag_url} className="w-7 h-5 object-cover rounded flex-shrink-0"/>}
-            </div>
+        <div className="p-3 space-y-3">
+          {/* Local */}
+          <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl px-3 py-2">
+            {homeTeam?.flag_url && <img src={homeTeam.flag_url} className="w-8 h-5 object-cover rounded flex-shrink-0"/>}
+            <span className={`text-sm font-bold flex-1 ${winner?.id === homeTeam?.id ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
+              {homeTeam?.name}{winner?.id === homeTeam?.id && ' ✓'}
+            </span>
+            <ScoreInput value={home} onChange={setHome}/>
           </div>
+
           <div className="flex items-center justify-center gap-3">
-            <ScoreSelector value={home} onChange={setHome}/>
-            <span className="text-2xl font-black text-gray-300 dark:text-gray-600">:</span>
-            <ScoreSelector value={away} onChange={setAway}/>
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"/>
+            <span className="text-xs font-bold text-gray-400 px-2">VS</span>
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"/>
           </div>
+
+          {/* Visitante */}
+          <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl px-3 py-2">
+            {awayTeam?.flag_url && <img src={awayTeam.flag_url} className="w-8 h-5 object-cover rounded flex-shrink-0"/>}
+            <span className={`text-sm font-bold flex-1 ${winner?.id === awayTeam?.id ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
+              {winner?.id === awayTeam?.id && '✓ '}{awayTeam?.name}
+            </span>
+            <ScoreInput value={away} onChange={setAway}/>
+          </div>
+
           {Number(home) === Number(away) && home !== '' && (
             <p className="text-xs text-red-500 text-center">No puede haber empate en eliminatorias</p>
           )}
@@ -230,7 +240,6 @@ export default function CaminoPage() {
     [...allThirds].sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf)
   , [allThirds])
 
-  // Asignar mejores terceros a slots oficiales
   const assignedThirds = useMemo(() => {
     const assigned = new Set<string>()
     const result: Record<string, any> = {}
@@ -249,7 +258,6 @@ export default function CaminoPage() {
     return result
   }, [sortedThirds])
 
-  // Partidos por fase
   const r32Matches = useMemo(() => matches.filter(m => m.stage?.type === 'round_of_32').sort((a,b) => a.match_number - b.match_number), [matches])
   const r16Matches = useMemo(() => matches.filter(m => m.stage?.type === 'round_of_16').sort((a,b) => a.match_number - b.match_number), [matches])
   const qfMatches  = useMemo(() => matches.filter(m => m.stage?.type === 'quarter_final').sort((a,b) => a.match_number - b.match_number), [matches])
@@ -257,57 +265,52 @@ export default function CaminoPage() {
   const tpMatch    = useMemo(() => matches.find(m => m.stage?.type === 'third_place'), [matches])
   const finalMatch = useMemo(() => matches.find(m => m.stage?.type === 'final'), [matches])
 
-  // R32 con equipos reales
   const r32WithTeams = useMemo(() => R32_OFFICIAL.map(slot => {
     const match = r32Matches[slot.idx]
     const homeSpec = slot.home as any
     const awaySpec = slot.away as any
-    let homeTeam = homeSpec.g
+    const homeTeam = homeSpec.g
       ? (isGroupDone(homeSpec.g) ? groupStandings[homeSpec.g]?.[homeSpec.r - 1] ?? null : null)
       : assignedThirds[`${slot.idx}_home`] ?? null
-    let awayTeam = awaySpec.g
+    const awayTeam = awaySpec.g
       ? (isGroupDone(awaySpec.g) ? groupStandings[awaySpec.g]?.[awaySpec.r - 1] ?? null : null)
       : assignedThirds[`${slot.idx}_away`] ?? null
     return { ...slot, match, homeTeam, awayTeam }
   }), [r32Matches, groupStandings, assignedThirds])
 
-  // Ganadores R32 → Octavos
   const r32Winners = useMemo(() =>
     r32WithTeams.map(s => getWinner(predMap, s.match, s.homeTeam, s.awayTeam))
   , [r32WithTeams, predMap])
 
-  // Octavos con equipos
-  const r16WithTeams = useMemo(() => r16Matches.map((match, i) => {
-    const homeTeam = r32Winners[i * 2] ?? null
-    const awayTeam = r32Winners[i * 2 + 1] ?? null
-    return { match, homeTeam, awayTeam, label: `Octavos ${i+1}: G${i*2+1} vs G${i*2+2}` }
-  }), [r16Matches, r32Winners])
+  const r16WithTeams = useMemo(() => r16Matches.map((match, i) => ({
+    match,
+    homeTeam: r32Winners[i * 2] ?? null,
+    awayTeam: r32Winners[i * 2 + 1] ?? null,
+    label: `Octavos ${i+1}`
+  })), [r16Matches, r32Winners])
 
-  // Ganadores Octavos → Cuartos
   const r16Winners = useMemo(() =>
     r16WithTeams.map(s => getWinner(predMap, s.match, s.homeTeam, s.awayTeam))
   , [r16WithTeams, predMap])
 
-  // Cuartos con equipos
-  const qfWithTeams = useMemo(() => qfMatches.map((match, i) => {
-    const homeTeam = r16Winners[i * 2] ?? null
-    const awayTeam = r16Winners[i * 2 + 1] ?? null
-    return { match, homeTeam, awayTeam, label: `Cuartos ${i+1}` }
-  }), [qfMatches, r16Winners])
+  const qfWithTeams = useMemo(() => qfMatches.map((match, i) => ({
+    match,
+    homeTeam: r16Winners[i * 2] ?? null,
+    awayTeam: r16Winners[i * 2 + 1] ?? null,
+    label: `Cuartos ${i+1}`
+  })), [qfMatches, r16Winners])
 
-  // Ganadores y perdedores Cuartos → Semis
   const qfWinners = useMemo(() =>
     qfWithTeams.map(s => getWinner(predMap, s.match, s.homeTeam, s.awayTeam))
   , [qfWithTeams, predMap])
 
-  // Semis con equipos
-  const sfWithTeams = useMemo(() => sfMatches.map((match, i) => {
-    const homeTeam = qfWinners[i * 2] ?? null
-    const awayTeam = qfWinners[i * 2 + 1] ?? null
-    return { match, homeTeam, awayTeam, label: `Semifinal ${i+1}` }
-  }), [sfMatches, qfWinners])
+  const sfWithTeams = useMemo(() => sfMatches.map((match, i) => ({
+    match,
+    homeTeam: qfWinners[i * 2] ?? null,
+    awayTeam: qfWinners[i * 2 + 1] ?? null,
+    label: `Semifinal ${i+1}`
+  })), [sfMatches, qfWinners])
 
-  // Ganadores y perdedores Semis → Final y Tercer Lugar
   const sfWinners = useMemo(() =>
     sfWithTeams.map(s => getWinner(predMap, s.match, s.homeTeam, s.awayTeam))
   , [sfWithTeams, predMap])
@@ -319,7 +322,6 @@ export default function CaminoPage() {
   const totalGroupsDone = GROUPS.filter(isGroupDone).length
   const bestThirds8 = sortedThirds.slice(0, 8)
 
-  // Campeón predicho
   const finalPred = finalMatch ? predMap.get(finalMatch.id) : null
   const champion = finalPred && sfWinners[0] && sfWinners[1]
     ? (Number(finalPred.home_score) > Number(finalPred.away_score) ? sfWinners[0] : sfWinners[1])
@@ -364,7 +366,6 @@ export default function CaminoPage() {
         </div>
       )}
 
-      {/* Mejores terceros */}
       {activeStage === 'r32' && totalGroupsDone > 0 && (
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
           <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
@@ -393,7 +394,6 @@ export default function CaminoPage() {
         </div>
       )}
 
-      {/* Tabs */}
       <div className="flex gap-1 overflow-x-auto pb-1">
         {STAGES.map(s => {
           const done = stagePredCounts[s.id]
@@ -414,92 +414,66 @@ export default function CaminoPage() {
         })}
       </div>
 
-      {/* RONDA DE 32 */}
       {activeStage === 'r32' && (
         <div className="grid sm:grid-cols-2 gap-3">
           {r32WithTeams.map(({ match, homeTeam, awayTeam, label, idx }) => (
-            <MatchCard key={idx}
-              match={match} homeTeam={homeTeam} awayTeam={awayTeam}
+            <MatchCard key={idx} match={match} homeTeam={homeTeam} awayTeam={awayTeam}
               prediction={match ? predMap.get(match.id) : null}
               onSave={savePrediction} pts={5}
               isLocked={!isPredictionsOpen || match?.is_locked}
-              label={label}
-              pendingMsg="Completa los grupos para ver los equipos"
-            />
+              label={label} pendingMsg="Completa los grupos para ver los equipos"/>
           ))}
         </div>
       )}
 
-      {/* OCTAVOS */}
       {activeStage === 'r16' && (
         <div className="grid sm:grid-cols-2 gap-3">
           {r16WithTeams.map(({ match, homeTeam, awayTeam, label }, i) => (
-            <MatchCard key={i}
-              match={match} homeTeam={homeTeam} awayTeam={awayTeam}
+            <MatchCard key={i} match={match} homeTeam={homeTeam} awayTeam={awayTeam}
               prediction={predMap.get(match?.id)} onSave={savePrediction} pts={5}
               isLocked={!isPredictionsOpen || match?.is_locked}
-              label={label}
-              pendingMsg="Predice los partidos de Ronda de 32 primero"
-            />
+              label={label} pendingMsg="Predice la Ronda de 32 primero"/>
           ))}
         </div>
       )}
 
-      {/* CUARTOS */}
       {activeStage === 'qf' && (
         <div className="grid sm:grid-cols-2 gap-3">
           {qfWithTeams.map(({ match, homeTeam, awayTeam, label }, i) => (
-            <MatchCard key={i}
-              match={match} homeTeam={homeTeam} awayTeam={awayTeam}
+            <MatchCard key={i} match={match} homeTeam={homeTeam} awayTeam={awayTeam}
               prediction={predMap.get(match?.id)} onSave={savePrediction} pts={7}
               isLocked={!isPredictionsOpen || match?.is_locked}
-              label={label}
-              pendingMsg="Predice los Octavos primero"
-            />
+              label={label} pendingMsg="Predice los Octavos primero"/>
           ))}
         </div>
       )}
 
-      {/* SEMIS */}
       {activeStage === 'sf' && (
         <div className="grid sm:grid-cols-2 gap-3">
           {sfWithTeams.map(({ match, homeTeam, awayTeam, label }, i) => (
-            <MatchCard key={i}
-              match={match} homeTeam={homeTeam} awayTeam={awayTeam}
+            <MatchCard key={i} match={match} homeTeam={homeTeam} awayTeam={awayTeam}
               prediction={predMap.get(match?.id)} onSave={savePrediction} pts={10}
               isLocked={!isPredictionsOpen || match?.is_locked}
-              label={label}
-              pendingMsg="Predice los Cuartos primero"
-            />
+              label={label} pendingMsg="Predice los Cuartos primero"/>
           ))}
         </div>
       )}
 
-      {/* TERCER LUGAR */}
       {activeStage === 'tp' && tpMatch && (
         <div className="max-w-md">
-          <MatchCard
-            match={tpMatch}
-            homeTeam={sfLosers[0]} awayTeam={sfLosers[1]}
+          <MatchCard match={tpMatch} homeTeam={sfLosers[0]} awayTeam={sfLosers[1]}
             prediction={predMap.get(tpMatch.id)} onSave={savePrediction} pts={10}
             isLocked={!isPredictionsOpen || tpMatch.is_locked}
-            label="Tercer Lugar"
-            pendingMsg="Predice las Semifinales primero"
-          />
+            label="Tercer Lugar" pendingMsg="Predice las Semifinales primero"/>
         </div>
       )}
 
-      {/* FINAL */}
       {activeStage === 'final' && finalMatch && (
         <div className="max-w-md">
-          <MatchCard
-            match={finalMatch}
-            homeTeam={sfWinners[0]} awayTeam={sfWinners[1]}
+          <MatchCard match={finalMatch} homeTeam={sfWinners[0]} awayTeam={sfWinners[1]}
             prediction={predMap.get(finalMatch.id)} onSave={savePrediction} pts={15}
             isLocked={!isPredictionsOpen || finalMatch.is_locked}
-            label="Gran Final 🏆"
-            pendingMsg="Predice las Semifinales primero"
-          />
+            label="Gran Final 🏆" pendingMsg="Predice las Semifinales primero"/>
         </div>
       )}
     </div>
