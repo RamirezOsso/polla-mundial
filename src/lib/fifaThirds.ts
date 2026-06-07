@@ -1,7 +1,3 @@
-// Matriz oficial FIFA 2026 - Annex C
-// Fuente: Wikipedia - 2026 FIFA World Cup knockout stage
-// Columnas: [1A_vs, 1B_vs, 1D_vs, 1E_vs, 1G_vs, 1I_vs, 1K_vs, 1L_vs]
-
 const MATRIX: Record<string, string[]> = {
   'DEFGHIJKL': ['3E','3J','3I','3F','3H','3G','3L','3K'],
   'CEFGHIJKL': ['3E','3J','3I','3C','3H','3G','3L','3K'],
@@ -154,7 +150,6 @@ export function assignThirdsOfficially(
       }
     })
   } else {
-    // Fallback por grupos permitidos
     const FALLBACK: Record<string, string[]> = {
       'E': ['A','B','C','D','F'],
       'I': ['C','D','F','G','H'],
