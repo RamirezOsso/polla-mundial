@@ -7,144 +7,164 @@ import { usePredictions } from '@/hooks/usePredictions'
 const GROUPS = 'ABCDEFGHIJKL'.split('')
 
 const STAGES = [
-  { id: 'r32', label: 'Ronda de 32' },
-  { id: 'r16', label: 'Octavos' },
-  { id: 'qf', label: 'Cuartos' },
-  { id: 'sf', label: 'Semis' },
-  { id: 'tp', label: 'Tercer Lugar' },
-  { id: 'final', label: 'Final' },
+  { id: 'r32', label: 'Ronda de 32', type: 'round_of_32', pts: 5 },
+  { id: 'r16', label: 'Octavos', type: 'round_of_16', pts: 5 },
+  { id: 'qf', label: 'Cuartos', type: 'quarter_final', pts: 7 },
+  { id: 'sf', label: 'Semis', type: 'semi_final', pts: 10 },
+  { id: 'tp', label: 'Tercer Lugar', type: 'third_place', pts: 10 },
+  { id: 'final', label: 'Final', type: 'final', pts: 15 },
 ]
 
-const STAGE_POINTS: Record<string, number> = {
-  r32: 5, r16: 5, qf: 7, sf: 10, tp: 10, final: 15
-}
-
-const R32_STRUCTURE = [
-  { id: 'r32_0',  home: {g:'A',r:1}, away: {g:'B',r:2} },
-  { id: 'r32_1',  home: {g:'C',r:1}, away: {g:'D',r:2} },
-  { id: 'r32_2',  home: {g:'E',r:1}, away: {g:'F',r:2} },
-  { id: 'r32_3',  home: {g:'G',r:1}, away: {g:'H',r:2} },
-  { id: 'r32_4',  home: {g:'I',r:1}, away: {g:'J',r:2} },
-  { id: 'r32_5',  home: {g:'K',r:1}, away: {g:'L',r:2} },
-  { id: 'r32_6',  home: {g:'B',r:1}, away: {g:'A',r:2} },
-  { id: 'r32_7',  home: {g:'D',r:1}, away: {g:'C',r:2} },
-  { id: 'r32_8',  home: {g:'F',r:1}, away: {g:'E',r:2} },
-  { id: 'r32_9',  home: {g:'H',r:1}, away: {g:'G',r:2} },
-  { id: 'r32_10', home: {g:'J',r:1}, away: {g:'I',r:2} },
-  { id: 'r32_11', home: {g:'L',r:1}, away: {g:'K',r:2} },
-]
-
-const R16_STRUCTURE = [
-  { id: 'r16_0', home: 'r32_0', away: 'r32_1' },
-  { id: 'r16_1', home: 'r32_2', away: 'r32_3' },
-  { id: 'r16_2', home: 'r32_4', away: 'r32_5' },
-  { id: 'r16_3', home: 'r32_6', away: 'r32_7' },
-  { id: 'r16_4', home: 'r32_8', away: 'r32_9' },
-  { id: 'r16_5', home: 'r32_10', away: 'r32_11' },
-  { id: 'r16_6', home: 'r32_0', away: 'r32_2' },
-  { id: 'r16_7', home: 'r32_1', away: 'r32_3' },
-]
-
-const QF_STRUCTURE = [
-  { id: 'qf_0', home: 'r16_0', away: 'r16_1' },
-  { id: 'qf_1', home: 'r16_2', away: 'r16_3' },
-  { id: 'qf_2', home: 'r16_4', away: 'r16_5' },
-  { id: 'qf_3', home: 'r16_6', away: 'r16_7' },
-  { id: 'qf_4', home: 'r16_0', away: 'r16_2' },
-  { id: 'qf_5', home: 'r16_1', away: 'r16_3' },
-]
-
-const SF_STRUCTURE = [
-  { id: 'sf_0', home: 'qf_0', away: 'qf_1' },
-  { id: 'sf_1', home: 'qf_2', away: 'qf_3' },
-  { id: 'sf_2', home: 'qf_4', away: 'qf_5' },
-]
-
-function ScoreSelector({ value, onChange }: { value: number|string, onChange: (n: number) => void }) {
+function ScoreSelector({ value, onChange, disabled }: { value: number|string, onChange: (n: number) => void, disabled?: boolean }) {
   return (
     <div className="flex flex-col items-center gap-1">
-      <input type="number" min="0" max="20" value={value}
-        onChange={e => onChange(e.target.value === '' ? 0 : Number(e.target.value))}
-        className="w-12 h-12 text-center text-2xl font-black bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-green-500"/>
-      <div className="flex gap-0.5">
-        {[0,1,2,3,4,5].map(n => (
-          <button key={n} onClick={() => onChange(n)}
-            className={`w-6 h-5 rounded text-xs font-bold transition-all ${value===n ? 'bg-green-600 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-500 hover:bg-gray-300 dark:hover:bg-gray-700'}`}>
-            {n}
-          </button>
-        ))}
+      <div className="w-12 h-12 flex items-center justify-center bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-xl text-2xl font-black text-gray-900 dark:text-white">
+        {value !== '' ? value : '?'}
       </div>
+      {!disabled && (
+        <div className="flex gap-0.5">
+          {[0,1,2,3,4,5].map(n => (
+            <button key={n} onClick={() => onChange(n)}
+              className={`w-7 h-6 rounded-lg text-xs font-bold transition-all ${value===n ? 'bg-green-600 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-500 hover:bg-gray-300 dark:hover:bg-gray-700'}`}>
+              {n}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
 
-function MatchCard({ matchId, homeTeam, awayTeam, userPreds, onSave, stageId, canPlay, missingMsg }: any) {
-  const existing = userPreds[matchId]
-  const [home, setHome] = useState<number>(existing?.h ?? 0)
-  const [away, setAway] = useState<number>(existing?.a ?? 0)
+function MatchCard({ match, homeTeam, awayTeam, prediction, onSave, pts, isLocked }: any) {
+  const [home, setHome] = useState<number|string>(prediction?.home_score ?? '')
+  const [away, setAway] = useState<number|string>(prediction?.away_score ?? '')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
-  const winner = existing
-    ? (existing.h > existing.a ? homeTeam : existing.a > existing.h ? awayTeam : null)
+  const isTBD = homeTeam?.short_name === 'TBD' || awayTeam?.short_name === 'TBD'
+  const hasPred = prediction != null
+  const isFinished = match?.status === 'finished'
+
+  const winner = hasPred && prediction.home_score !== prediction.away_score
+    ? (prediction.home_score > prediction.away_score ? homeTeam : awayTeam)
     : null
 
   const handleSave = async () => {
-    if (home === away) return
+    if (home === '' || away === '' || Number(home) === Number(away)) return
     setSaving(true)
-    await onSave(matchId, home, away)
+    await onSave(match.id, Number(home), Number(away))
     setSaved(true)
-    setTimeout(() => setSaved(false), 1500)
+    setTimeout(() => setSaved(false), 3000)
     setSaving(false)
   }
 
   return (
-    <div className={`bg-white dark:bg-gray-900 border rounded-2xl overflow-hidden ${
-      !canPlay ? 'border-gray-200 dark:border-gray-800 opacity-50' :
-      existing ? 'border-green-300 dark:border-green-500/30' : 'border-gray-200 dark:border-gray-700'
+    <div className={`bg-white dark:bg-gray-900 border rounded-2xl overflow-hidden transition-all ${
+      isTBD ? 'border-gray-200 dark:border-gray-800 opacity-60' :
+      hasPred ? 'border-green-300 dark:border-green-500/30' :
+      'border-gray-200 dark:border-gray-700'
     }`}>
-      <div className="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-800/40">
-        <span className="text-xs text-gray-500 truncate flex-1">
-          {homeTeam?.name ?? '?'} vs {awayTeam?.name ?? '?'}
-        </span>
-        <span className="text-xs font-bold text-yellow-500 ml-2 flex-shrink-0">+{STAGE_POINTS[stageId]}pts</span>
+      {/* Header */}
+      <div className="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-800/50">
+        {isTBD ? (
+          <span className="text-xs text-gray-400">⏳ Equipos por definir</span>
+        ) : (
+          <span className="text-xs text-gray-500 truncate flex-1">
+            {homeTeam?.name} vs {awayTeam?.name}
+          </span>
+        )}
+        <span className="text-xs font-bold text-yellow-500 ml-2 flex-shrink-0">+{pts}pts</span>
       </div>
 
-      {!canPlay ? (
-        <div className="px-3 py-3 text-center">
-          <p className="text-xs text-gray-400">⏳ {missingMsg}</p>
+      {isTBD ? (
+        <div className="px-4 py-4 text-center">
+          <p className="text-xs text-gray-400">Disponible cuando se definan los clasificados</p>
         </div>
-      ) : (
+      ) : isFinished ? (
+        /* Resultado oficial */
         <div className="p-3 space-y-2">
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 flex-1 justify-end">
-              {homeTeam?.flag_url && <img src={homeTeam.flag_url} className="w-6 h-4 object-cover rounded flex-shrink-0"/>}
-              <span className={`text-xs font-bold truncate ${winner?.id === homeTeam?.id ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
-                {homeTeam?.short_name ?? '?'}{winner?.id === homeTeam?.id && ' ✓'}
+            <div className="flex items-center gap-2 flex-1 justify-end">
+              {homeTeam?.flag_url && <img src={homeTeam.flag_url} className="w-7 h-5 object-cover rounded flex-shrink-0"/>}
+              <span className="font-bold text-gray-900 dark:text-white text-sm">{homeTeam?.short_name}</span>
+            </div>
+            <div className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-xl text-center min-w-[70px]">
+              <span className="text-xl font-black text-gray-900 dark:text-white">{match.home_score}-{match.away_score}</span>
+            </div>
+            <div className="flex items-center gap-2 flex-1">
+              <span className="font-bold text-gray-900 dark:text-white text-sm">{awayTeam?.short_name}</span>
+              {awayTeam?.flag_url && <img src={awayTeam.flag_url} className="w-7 h-5 object-cover rounded flex-shrink-0"/>}
+            </div>
+          </div>
+          {hasPred && (
+            <div className={`text-center text-xs font-bold px-3 py-1.5 rounded-xl ${
+              prediction.points_earned === 5 ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400' :
+              prediction.points_earned >= 3 ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400' :
+              'bg-gray-100 dark:bg-gray-700 text-gray-500'
+            }`}>
+              Mi pronóstico: {prediction.home_score}-{prediction.away_score} · +{prediction.points_earned ?? 0}pts
+            </div>
+          )}
+        </div>
+      ) : isLocked ? (
+        /* Bloqueado */
+        <div className="p-3">
+          <div className="flex items-center gap-2 justify-center">
+            <div className="flex items-center gap-2 flex-1 justify-end">
+              {homeTeam?.flag_url && <img src={homeTeam.flag_url} className="w-7 h-5 object-cover rounded"/>}
+              <span className="font-bold text-gray-900 dark:text-white text-sm">{homeTeam?.short_name}</span>
+            </div>
+            <div className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-xl min-w-[70px] text-center">
+              {hasPred
+                ? <span className="text-sm font-black text-blue-500">{prediction.home_score}-{prediction.away_score}</span>
+                : <span className="text-xs text-gray-400">🔒</span>}
+            </div>
+            <div className="flex items-center gap-2 flex-1">
+              <span className="font-bold text-gray-900 dark:text-white text-sm">{awayTeam?.short_name}</span>
+              {awayTeam?.flag_url && <img src={awayTeam.flag_url} className="w-7 h-5 object-cover rounded"/>}
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Input predicción */
+        <div className="p-3 space-y-2">
+          {/* Banderas y nombres */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1 justify-end">
+              {homeTeam?.flag_url && <img src={homeTeam.flag_url} className="w-7 h-5 object-cover rounded flex-shrink-0"/>}
+              <span className={`text-sm font-bold truncate ${winner?.id === homeTeam?.id ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
+                {homeTeam?.short_name}{winner?.id === homeTeam?.id && ' ✓'}
               </span>
             </div>
-            <span className="text-gray-300 dark:text-gray-600 text-xs flex-shrink-0">vs</span>
-            <div className="flex items-center gap-1.5 flex-1">
-              <span className={`text-xs font-bold truncate ${winner?.id === awayTeam?.id ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
-                {winner?.id === awayTeam?.id && '✓ '}{awayTeam?.short_name ?? '?'}
+            <span className="text-gray-300 dark:text-gray-600 text-xs">vs</span>
+            <div className="flex items-center gap-2 flex-1">
+              <span className={`text-sm font-bold truncate ${winner?.id === awayTeam?.id ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
+                {winner?.id === awayTeam?.id && '✓ '}{awayTeam?.short_name}
               </span>
-              {awayTeam?.flag_url && <img src={awayTeam.flag_url} className="w-6 h-4 object-cover rounded flex-shrink-0"/>}
+              {awayTeam?.flag_url && <img src={awayTeam.flag_url} className="w-7 h-5 object-cover rounded flex-shrink-0"/>}
             </div>
           </div>
 
+          {/* Score */}
           <div className="flex items-center justify-center gap-3">
-            <ScoreSelector value={home} onChange={setHome} />
+            <ScoreSelector value={home} onChange={setHome}/>
             <span className="text-2xl font-black text-gray-300 dark:text-gray-600">:</span>
-            <ScoreSelector value={away} onChange={setAway} />
+            <ScoreSelector value={away} onChange={setAway}/>
           </div>
 
-          {home === away && (
-            <p className="text-xs text-red-500 text-center">No puede ser empate en eliminatorias</p>
+          {Number(home) === Number(away) && home !== '' && (
+            <p className="text-xs text-red-500 text-center">No puede haber empate en eliminatorias</p>
           )}
 
-          <button onClick={handleSave} disabled={saving || home === away}
-            className="w-full py-2 bg-gradient-to-r from-green-600 to-green-500 text-white font-bold rounded-xl text-xs disabled:opacity-40">
-            {saved ? '✅ Guardado' : saving ? '...' : '💾 Guardar'}
+          {/* Botón guardar */}
+          <button onClick={handleSave}
+            disabled={saving || home === '' || away === '' || Number(home) === Number(away)}
+            className={`w-full py-2.5 font-bold rounded-xl text-sm transition-all disabled:opacity-40 ${
+              saved
+                ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 border border-green-300 dark:border-green-500/30'
+                : 'bg-gradient-to-r from-green-600 to-green-500 text-white'
+            }`}>
+            {saved ? '✅ ¡Guardado!' : saving ? 'Guardando...' : hasPred ? '🔄 Actualizar' : '💾 Guardar'}
           </button>
         </div>
       )}
@@ -155,13 +175,13 @@ function MatchCard({ matchId, homeTeam, awayTeam, userPreds, onSave, stageId, ca
 export default function CaminoPage() {
   const { user } = useAuth()
   const { matches, loading } = useMatches()
-  const { predictions } = usePredictions(user?.id)
+  const { predictions, savePrediction, isPredictionsOpen } = usePredictions(user?.id)
   const [activeStage, setActiveStage] = useState('r32')
-  const [virtualPreds, setVirtualPreds] = useState<Record<string, {h:number, a:number}>>({})
 
   const predMap = useMemo(() => new Map(predictions.map(p => [p.match_id, p])), [predictions])
   const groupMatches = useMemo(() => matches.filter(m => m.stage?.type === 'group'), [matches])
 
+  // Standings por grupo
   const groupStandings = useMemo(() => {
     const s: Record<string, any[]> = {}
     GROUPS.forEach(g => {
@@ -191,61 +211,45 @@ export default function CaminoPage() {
     return gm.length > 0 && gm.every(m => predMap.has(m.id))
   }
 
-  const r32 = useMemo(() => R32_STRUCTURE.map(m => {
-    const homeDone = isGroupDone(m.home.g)
-    const awayDone = isGroupDone(m.away.g)
-    const homeTeam = homeDone ? groupStandings[m.home.g]?.[m.home.r - 1] : null
-    const awayTeam = awayDone ? groupStandings[m.away.g]?.[m.away.r - 1] : null
-    const canPlay = homeDone && awayDone
-    const vp = virtualPreds[m.id]
-    const winner = vp ? (vp.h > vp.a ? homeTeam : awayTeam) : null
-    return { ...m, homeTeam, awayTeam, canPlay, winner,
-      missing: !homeDone && !awayDone ? `Grupos ${m.home.g} y ${m.away.g}` : !homeDone ? `Grupo ${m.home.g}` : `Grupo ${m.away.g}` }
-  }), [groupStandings, virtualPreds])
+  // Partidos por fase
+  const r32Matches = useMemo(() => matches.filter(m => m.stage?.type === 'round_of_32').sort((a,b) => a.match_number - b.match_number), [matches])
+  const r16Matches = useMemo(() => matches.filter(m => m.stage?.type === 'round_of_16').sort((a,b) => a.match_number - b.match_number), [matches])
+  const qfMatches = useMemo(() => matches.filter(m => m.stage?.type === 'quarter_final').sort((a,b) => a.match_number - b.match_number), [matches])
+  const sfMatches = useMemo(() => matches.filter(m => m.stage?.type === 'semi_final').sort((a,b) => a.match_number - b.match_number), [matches])
+  const tpMatch = useMemo(() => matches.find(m => m.stage?.type === 'third_place'), [matches])
+  const finalMatch = useMemo(() => matches.find(m => m.stage?.type === 'final'), [matches])
 
-  const getWinner = (id: string, roundData: any[]) => roundData.find(x => x.id === id)?.winner ?? null
+  // Cruces R32 con equipos reales según standings
+  const R32_STRUCTURE = [
+    { idx: 0, home: {g:'A',r:1}, away: {g:'B',r:2}, label: '1°A vs 2°B' },
+    { idx: 1, home: {g:'C',r:1}, away: {g:'D',r:2}, label: '1°C vs 2°D' },
+    { idx: 2, home: {g:'E',r:1}, away: {g:'F',r:2}, label: '1°E vs 2°F' },
+    { idx: 3, home: {g:'G',r:1}, away: {g:'H',r:2}, label: '1°G vs 2°H' },
+    { idx: 4, home: {g:'I',r:1}, away: {g:'J',r:2}, label: '1°I vs 2°J' },
+    { idx: 5, home: {g:'K',r:1}, away: {g:'L',r:2}, label: '1°K vs 2°L' },
+    { idx: 6, home: {g:'B',r:1}, away: {g:'A',r:2}, label: '1°B vs 2°A' },
+    { idx: 7, home: {g:'D',r:1}, away: {g:'C',r:2}, label: '1°D vs 2°C' },
+    { idx: 8, home: {g:'F',r:1}, away: {g:'E',r:2}, label: '1°F vs 2°E' },
+    { idx: 9, home: {g:'H',r:1}, away: {g:'G',r:2}, label: '1°H vs 2°G' },
+    { idx: 10, home: {g:'J',r:1}, away: {g:'I',r:2}, label: '1°J vs 2°I' },
+    { idx: 11, home: {g:'L',r:1}, away: {g:'K',r:2}, label: '1°L vs 2°K' },
+  ]
 
-  const r16 = useMemo(() => R16_STRUCTURE.map(m => {
-    const homeTeam = getWinner(m.home, r32)
-    const awayTeam = getWinner(m.away, r32)
-    const canPlay = !!(homeTeam && awayTeam)
-    const vp = virtualPreds[m.id]
-    const winner = vp && homeTeam && awayTeam ? (vp.h > vp.a ? homeTeam : awayTeam) : null
-    return { ...m, homeTeam, awayTeam, canPlay, winner, missing: 'Predice la Ronda de 32 primero' }
-  }), [r32, virtualPreds])
-
-  const qf = useMemo(() => QF_STRUCTURE.map(m => {
-    const homeTeam = getWinner(m.home, r16)
-    const awayTeam = getWinner(m.away, r16)
-    const canPlay = !!(homeTeam && awayTeam)
-    const vp = virtualPreds[m.id]
-    const winner = vp && homeTeam && awayTeam ? (vp.h > vp.a ? homeTeam : awayTeam) : null
-    return { ...m, homeTeam, awayTeam, canPlay, winner, missing: 'Predice Octavos primero' }
-  }), [r16, virtualPreds])
-
-  const sf = useMemo(() => SF_STRUCTURE.map(m => {
-    const homeTeam = getWinner(m.home, qf)
-    const awayTeam = getWinner(m.away, qf)
-    const canPlay = !!(homeTeam && awayTeam)
-    const vp = virtualPreds[m.id]
-    const winner = vp && homeTeam && awayTeam ? (vp.h > vp.a ? homeTeam : awayTeam) : null
-    const loser = vp && homeTeam && awayTeam ? (vp.h > vp.a ? awayTeam : homeTeam) : null
-    return { ...m, homeTeam, awayTeam, canPlay, winner, loser, missing: 'Predice Cuartos primero' }
-  }), [qf, virtualPreds])
-
-  const sf0 = sf[0]; const sf1 = sf[1]
-  const tpMatch = { id: 'tp_0', homeTeam: sf0?.loser ?? null, awayTeam: sf1?.loser ?? null, canPlay: !!(sf0?.loser && sf1?.loser), missing: 'Predice Semifinales primero' }
-  const finalMatch = { id: 'final_0', homeTeam: sf0?.winner ?? null, awayTeam: sf1?.winner ?? null, canPlay: !!(sf0?.winner && sf1?.winner), missing: 'Predice Semifinales primero' }
-
-  const handleVirtualSave = (matchId: string, h: number, a: number) => {
-    setVirtualPreds(prev => ({ ...prev, [matchId]: { h, a } }))
-  }
+  const r32WithTeams = useMemo(() => R32_STRUCTURE.map(s => {
+    const match = r32Matches[s.idx]
+    const homeDone = isGroupDone(s.home.g)
+    const awayDone = isGroupDone(s.away.g)
+    const homeTeam = homeDone ? (groupStandings[s.home.g]?.[s.home.r - 1] ?? match?.home_team) : match?.home_team
+    const awayTeam = awayDone ? (groupStandings[s.away.g]?.[s.away.r - 1] ?? match?.away_team) : match?.away_team
+    return { ...s, match, homeTeam, awayTeam, label: s.label }
+  }), [r32Matches, groupStandings])
 
   const totalGroupsDone = GROUPS.filter(isGroupDone).length
-  const stageData: Record<string, any[]> = { r32, r16, qf, sf, tp: [tpMatch], final: [finalMatch] }
 
-  const champion = virtualPreds['final_0']
-    ? (virtualPreds['final_0'].h > virtualPreds['final_0'].a ? finalMatch.homeTeam : finalMatch.awayTeam)
+  // Campeón predicho
+  const finalPred = finalMatch ? predMap.get(finalMatch.id) : null
+  const champion = finalPred && finalMatch?.home_team?.short_name !== 'TBD'
+    ? (finalPred.home_score > finalPred.away_score ? finalMatch.home_team : finalMatch.away_team)
     : null
 
   if (loading) return (
@@ -254,32 +258,38 @@ export default function CaminoPage() {
     </div>
   )
 
+  const stageMatchCounts: Record<string, number> = {
+    r32: r32Matches.length,
+    r16: r16Matches.length,
+    qf: qfMatches.length,
+    sf: sfMatches.length,
+    tp: tpMatch ? 1 : 0,
+    final: finalMatch ? 1 : 0,
+  }
+
+  const stagePredCounts: Record<string, number> = {
+    r32: r32Matches.filter(m => predMap.has(m.id)).length,
+    r16: r16Matches.filter(m => predMap.has(m.id)).length,
+    qf: qfMatches.filter(m => predMap.has(m.id)).length,
+    sf: sfMatches.filter(m => predMap.has(m.id)).length,
+    tp: tpMatch && predMap.has(tpMatch.id) ? 1 : 0,
+    final: finalMatch && predMap.has(finalMatch.id) ? 1 : 0,
+  }
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-black text-gray-900 dark:text-white">🏆 Camino al Campeón</h1>
-        <p className="text-gray-500 text-sm mt-1">{totalGroupsDone}/12 grupos completos</p>
+        <p className="text-gray-500 text-sm mt-1">{totalGroupsDone}/12 grupos con pronósticos</p>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 overflow-x-auto pb-1">
-        {STAGES.map(s => {
-          const done = (stageData[s.id] ?? []).filter((m: any) => virtualPreds[m.id]).length
-          return (
-            <button key={s.id} onClick={() => setActiveStage(s.id)}
-              className={`px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 flex items-center gap-1 ${
-                activeStage === s.id
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-              }`}>
-              {s.label}
-              {done > 0 && <span className="bg-green-500/30 text-green-700 dark:text-green-300 text-xs px-1.5 rounded-full">{done}</span>}
-            </button>
-          )
-        })}
-      </div>
+      {!isPredictionsOpen && (
+        <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-xl p-3 text-sm text-red-600 dark:text-red-400 font-medium">
+          🔒 Las predicciones están cerradas
+        </div>
+      )}
 
-      {/* Campeón predicho */}
+      {/* Campeón */}
       {champion && (
         <div className="bg-yellow-50 dark:bg-yellow-500/10 border border-yellow-200 dark:border-yellow-500/30 rounded-2xl p-4 text-center">
           <p className="text-xs text-gray-500 mb-1">Tu campeón predicho</p>
@@ -290,22 +300,138 @@ export default function CaminoPage() {
         </div>
       )}
 
-      {/* Partidos */}
-      <div className="grid sm:grid-cols-2 gap-3">
-        {(stageData[activeStage] ?? []).map((m: any) => (
-          <MatchCard
-            key={m.id}
-            matchId={m.id}
-            homeTeam={m.homeTeam}
-            awayTeam={m.awayTeam}
-            userPreds={virtualPreds}
-            onSave={handleVirtualSave}
-            stageId={activeStage}
-            canPlay={m.canPlay}
-            missingMsg={m.missing}
-          />
-        ))}
+      {/* Tabs */}
+      <div className="flex gap-1 overflow-x-auto pb-1">
+        {STAGES.map(s => {
+          const done = stagePredCounts[s.id]
+          const total = stageMatchCounts[s.id]
+          return (
+            <button key={s.id} onClick={() => setActiveStage(s.id)}
+              className={`px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 flex items-center gap-1 ${
+                activeStage === s.id ? 'bg-green-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              }`}>
+              {s.label}
+              {done > 0 && (
+                <span className={`text-xs px-1.5 rounded-full ${done === total ? 'bg-green-500/30 text-green-700 dark:text-green-300' : 'bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-300'}`}>
+                  {done}/{total}
+                </span>
+              )}
+            </button>
+          )
+        })}
       </div>
+
+      {/* RONDA DE 32 */}
+      {activeStage === 'r32' && (
+        <div className="grid sm:grid-cols-2 gap-3">
+          {r32WithTeams.map(({ match, homeTeam, awayTeam, label, idx }) => (
+            <div key={idx}>
+              <p className="text-xs text-gray-400 mb-1 px-1">{label}</p>
+              <MatchCard
+                match={match}
+                homeTeam={homeTeam}
+                awayTeam={awayTeam}
+                prediction={match ? predMap.get(match.id) : null}
+                onSave={savePrediction}
+                pts={5}
+                isLocked={!isPredictionsOpen || match?.is_locked}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* OCTAVOS */}
+      {activeStage === 'r16' && (
+        <div className="grid sm:grid-cols-2 gap-3">
+          {r16Matches.map((match, i) => (
+            <div key={match.id}>
+              <p className="text-xs text-gray-400 mb-1 px-1">Octavos {i+1}</p>
+              <MatchCard
+                match={match}
+                homeTeam={match.home_team}
+                awayTeam={match.away_team}
+                prediction={predMap.get(match.id)}
+                onSave={savePrediction}
+                pts={5}
+                isLocked={!isPredictionsOpen || match.is_locked}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* CUARTOS */}
+      {activeStage === 'qf' && (
+        <div className="grid sm:grid-cols-2 gap-3">
+          {qfMatches.map((match, i) => (
+            <div key={match.id}>
+              <p className="text-xs text-gray-400 mb-1 px-1">Cuartos {i+1}</p>
+              <MatchCard
+                match={match}
+                homeTeam={match.home_team}
+                awayTeam={match.away_team}
+                prediction={predMap.get(match.id)}
+                onSave={savePrediction}
+                pts={7}
+                isLocked={!isPredictionsOpen || match.is_locked}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* SEMIS */}
+      {activeStage === 'sf' && (
+        <div className="grid sm:grid-cols-2 gap-3">
+          {sfMatches.map((match, i) => (
+            <div key={match.id}>
+              <p className="text-xs text-gray-400 mb-1 px-1">Semifinal {i+1}</p>
+              <MatchCard
+                match={match}
+                homeTeam={match.home_team}
+                awayTeam={match.away_team}
+                prediction={predMap.get(match.id)}
+                onSave={savePrediction}
+                pts={10}
+                isLocked={!isPredictionsOpen || match.is_locked}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* TERCER LUGAR */}
+      {activeStage === 'tp' && tpMatch && (
+        <div className="max-w-md">
+          <p className="text-xs text-gray-400 mb-1 px-1">Partido por el Tercer Lugar</p>
+          <MatchCard
+            match={tpMatch}
+            homeTeam={tpMatch.home_team}
+            awayTeam={tpMatch.away_team}
+            prediction={predMap.get(tpMatch.id)}
+            onSave={savePrediction}
+            pts={10}
+            isLocked={!isPredictionsOpen || tpMatch.is_locked}
+          />
+        </div>
+      )}
+
+      {/* FINAL */}
+      {activeStage === 'final' && finalMatch && (
+        <div className="max-w-md">
+          <p className="text-xs text-gray-400 mb-1 px-1">Gran Final</p>
+          <MatchCard
+            match={finalMatch}
+            homeTeam={finalMatch.home_team}
+            awayTeam={finalMatch.away_team}
+            prediction={predMap.get(finalMatch.id)}
+            onSave={savePrediction}
+            pts={15}
+            isLocked={!isPredictionsOpen || finalMatch.is_locked}
+          />
+        </div>
+      )}
     </div>
   )
 }
