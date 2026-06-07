@@ -15,37 +15,34 @@ const STAGES = [
   { id: 'final', label: 'Final', type: 'final', pts: 15 },
 ]
 
-// Cruces R32 oficiales FIFA 2026
-// 12 cruces fijos (1ro vs 2do) + 4 cruces de mejores terceros
-const R32_FIXED = [
-  { idx: 0,  home: {g:'A',r:1}, away: {g:'B',r:2}, label: '1°A vs 2°B' },
-  { idx: 1,  home: {g:'C',r:1}, away: {g:'D',r:2}, label: '1°C vs 2°D' },
-  { idx: 2,  home: {g:'E',r:1}, away: {g:'F',r:2}, label: '1°E vs 2°F' },
-  { idx: 3,  home: {g:'G',r:1}, away: {g:'H',r:2}, label: '1°G vs 2°H' },
-  { idx: 4,  home: {g:'I',r:1}, away: {g:'J',r:2}, label: '1°I vs 2°J' },
-  { idx: 5,  home: {g:'K',r:1}, away: {g:'L',r:2}, label: '1°K vs 2°L' },
-  { idx: 6,  home: {g:'B',r:1}, away: {g:'A',r:2}, label: '1°B vs 2°A' },
-  { idx: 7,  home: {g:'D',r:1}, away: {g:'C',r:2}, label: '1°D vs 2°C' },
-  { idx: 8,  home: {g:'F',r:1}, away: {g:'E',r:2}, label: '1°F vs 2°E' },
-  { idx: 9,  home: {g:'H',r:1}, away: {g:'G',r:2}, label: '1°H vs 2°G' },
-  { idx: 10, home: {g:'J',r:1}, away: {g:'I',r:2}, label: '1°J vs 2°I' },
-  { idx: 11, home: {g:'L',r:1}, away: {g:'K',r:2}, label: '1°L vs 2°K' },
-]
-
-// 4 cruces de mejores terceros (por ranking de terceros)
-const R32_THIRDS = [
-  { idx: 12, homeThird: 0, awayThird: 1, label: 'Mejor 3° vs 2° Mejor 3°' },
-  { idx: 13, homeThird: 2, awayThird: 3, label: '3° Mejor 3° vs 4° Mejor 3°' },
-  { idx: 14, homeThird: 4, awayThird: 5, label: '5° Mejor 3° vs 6° Mejor 3°' },
-  { idx: 15, homeThird: 6, awayThird: 7, label: '7° Mejor 3° vs 8° Mejor 3°' },
+// Estructura oficial FIFA 2026 - Ronda de 32
+// Notación: home/away puede ser {g, r} para primero/segundo de grupo
+// o {thirds: ['A','B','C','D','F']} para mejor tercero de esos grupos
+const R32_OFFICIAL = [
+  { idx: 0,  home: {g:'A',r:2}, away: {g:'B',r:2}, label: '2°A vs 2°B', date: '2026-06-28T19:00:00Z' },
+  { idx: 1,  home: {g:'C',r:1}, away: {g:'F',r:2}, label: '1°C vs 2°F', date: '2026-06-29T17:00:00Z' },
+  { idx: 2,  home: {g:'E',r:1}, away: {thirds:['A','B','C','D','F']}, label: '1°E vs Mejor 3° (A/B/C/D/F)', date: '2026-06-29T20:30:00Z' },
+  { idx: 3,  home: {g:'F',r:1}, away: {g:'C',r:2}, label: '1°F vs 2°C', date: '2026-06-30T01:00:00Z' },
+  { idx: 4,  home: {g:'E',r:2}, away: {g:'I',r:2}, label: '2°E vs 2°I', date: '2026-06-30T17:00:00Z' },
+  { idx: 5,  home: {g:'I',r:1}, away: {thirds:['C','D','F','G','H']}, label: '1°I vs Mejor 3° (C/D/F/G/H)', date: '2026-06-30T21:00:00Z' },
+  { idx: 6,  home: {g:'A',r:1}, away: {thirds:['C','E','F','H','I']}, label: '1°A vs Mejor 3° (C/E/F/H/I)', date: '2026-07-01T01:00:00Z' },
+  { idx: 7,  home: {g:'L',r:1}, away: {thirds:['E','H','I','J','K']}, label: '1°L vs Mejor 3° (E/H/I/J/K)', date: '2026-07-01T16:00:00Z' },
+  { idx: 8,  home: {g:'G',r:1}, away: {thirds:['A','E','H','I','J']}, label: '1°G vs Mejor 3° (A/E/H/I/J)', date: '2026-07-01T20:00:00Z' },
+  { idx: 9,  home: {g:'D',r:1}, away: {thirds:['B','E','F','I','J']}, label: '1°D vs Mejor 3° (B/E/F/I/J)', date: '2026-07-02T00:00:00Z' },
+  { idx: 10, home: {g:'H',r:1}, away: {g:'J',r:2}, label: '1°H vs 2°J', date: '2026-07-02T19:00:00Z' },
+  { idx: 11, home: {g:'K',r:2}, away: {g:'L',r:2}, label: '2°K vs 2°L', date: '2026-07-02T23:00:00Z' },
+  { idx: 12, home: {g:'B',r:1}, away: {thirds:['D','E','I','J','L']}, label: '1°B vs Mejor 3° (D/E/I/J/L)', date: '2026-07-03T03:00:00Z' },
+  { idx: 13, home: {g:'D',r:2}, away: {g:'G',r:2}, label: '2°D vs 2°G', date: '2026-07-03T18:00:00Z' },
+  { idx: 14, home: {g:'J',r:1}, away: {g:'H',r:2}, label: '1°J vs 2°H', date: '2026-07-03T22:00:00Z' },
+  { idx: 15, home: {g:'K',r:1}, away: {thirds:['D','E','I','J','L']}, label: '1°K vs Mejor 3° (D/E/I/J/L)', date: '2026-07-04T01:30:00Z' },
 ]
 
 function calcStandings(matches: any[], predMap: Map<string, any>, group: string) {
   const teams: Record<string, any> = {}
   const gm = matches.filter(m => m.group_name === group)
   gm.forEach((m: any) => {
-    if (!teams[m.home_team_id]) teams[m.home_team_id] = { ...m.home_team, pts: 0, gd: 0, gf: 0, ga: 0, played: 0, won: 0, drawn: 0, lost: 0 }
-    if (!teams[m.away_team_id]) teams[m.away_team_id] = { ...m.away_team, pts: 0, gd: 0, gf: 0, ga: 0, played: 0, won: 0, drawn: 0, lost: 0 }
+    if (!teams[m.home_team_id]) teams[m.home_team_id] = { ...m.home_team, pts: 0, gd: 0, gf: 0, ga: 0, played: 0 }
+    if (!teams[m.away_team_id]) teams[m.away_team_id] = { ...m.away_team, pts: 0, gd: 0, gf: 0, ga: 0, played: 0 }
     const pred = predMap.get(m.id)
     const isFinished = m.status === 'finished'
     const h = isFinished ? m.home_score : pred?.home_score
@@ -55,16 +52,9 @@ function calcStandings(matches: any[], predMap: Map<string, any>, group: string)
     teams[m.home_team_id].ga += a; teams[m.away_team_id].ga += h
     teams[m.home_team_id].gd += h - a; teams[m.away_team_id].gd += a - h
     teams[m.home_team_id].played++; teams[m.away_team_id].played++
-    if (h > a) {
-      teams[m.home_team_id].pts += 3; teams[m.home_team_id].won++
-      teams[m.away_team_id].lost++
-    } else if (h < a) {
-      teams[m.away_team_id].pts += 3; teams[m.away_team_id].won++
-      teams[m.home_team_id].lost++
-    } else {
-      teams[m.home_team_id].pts += 1; teams[m.home_team_id].drawn++
-      teams[m.away_team_id].pts += 1; teams[m.away_team_id].drawn++
-    }
+    if (h > a) { teams[m.home_team_id].pts += 3 }
+    else if (h < a) { teams[m.away_team_id].pts += 3 }
+    else { teams[m.home_team_id].pts += 1; teams[m.away_team_id].pts += 1 }
   })
   return Object.values(teams).sort((a: any, b: any) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf)
 }
@@ -96,10 +86,8 @@ function MatchCard({ match, homeTeam, awayTeam, prediction, onSave, pts, isLocke
   const isTBD = !homeTeam || !awayTeam || homeTeam?.short_name === 'TBD' || awayTeam?.short_name === 'TBD'
   const hasPred = prediction != null
   const isFinished = match?.status === 'finished'
-
   const winner = hasPred && Number(prediction.home_score) !== Number(prediction.away_score)
-    ? (Number(prediction.home_score) > Number(prediction.away_score) ? homeTeam : awayTeam)
-    : null
+    ? (Number(prediction.home_score) > Number(prediction.away_score) ? homeTeam : awayTeam) : null
 
   const handleSave = async () => {
     if (home === '' || away === '' || Number(home) === Number(away)) return
@@ -113,21 +101,15 @@ function MatchCard({ match, homeTeam, awayTeam, prediction, onSave, pts, isLocke
   return (
     <div className={`bg-white dark:bg-gray-900 border rounded-2xl overflow-hidden transition-all ${
       isTBD ? 'border-gray-200 dark:border-gray-800 opacity-60' :
-      hasPred ? 'border-green-300 dark:border-green-500/30' :
-      'border-gray-200 dark:border-gray-700'
+      hasPred ? 'border-green-300 dark:border-green-500/30' : 'border-gray-200 dark:border-gray-700'
     }`}>
       <div className="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-800/50">
-        {isTBD ? (
-          <span className="text-xs text-gray-400">⏳ {label} — Por definir</span>
-        ) : (
-          <span className="text-xs text-gray-500 truncate flex-1">{label}</span>
-        )}
+        <span className="text-xs text-gray-500 truncate flex-1">{label}</span>
         <span className="text-xs font-bold text-yellow-500 ml-2 flex-shrink-0">+{pts}pts</span>
       </div>
-
       {isTBD ? (
         <div className="px-4 py-3 text-center">
-          <p className="text-xs text-gray-400">Completa los grupos para ver los equipos</p>
+          <p className="text-xs text-gray-400">⏳ Completa los grupos para ver los equipos</p>
         </div>
       ) : isFinished ? (
         <div className="p-3 space-y-2">
@@ -149,26 +131,22 @@ function MatchCard({ match, homeTeam, awayTeam, prediction, onSave, pts, isLocke
               prediction.points_earned === 5 ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400' :
               prediction.points_earned >= 3 ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400' :
               'bg-gray-100 dark:bg-gray-700 text-gray-500'
-            }`}>
-              Mi pronóstico: {prediction.home_score}-{prediction.away_score} · +{prediction.points_earned ?? 0}pts
-            </div>
+            }`}>Mi pronóstico: {prediction.home_score}-{prediction.away_score} · +{prediction.points_earned ?? 0}pts</div>
           )}
         </div>
       ) : isLocked ? (
-        <div className="p-3">
-          <div className="flex items-center gap-2 justify-center">
-            <div className="flex items-center gap-2 flex-1 justify-end">
-              {homeTeam?.flag_url && <img src={homeTeam.flag_url} className="w-7 h-5 object-cover rounded"/>}
-              <span className="font-bold text-gray-900 dark:text-white text-sm">{homeTeam?.short_name}</span>
-            </div>
-            <div className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-xl min-w-[70px] text-center">
-              {hasPred ? <span className="text-sm font-black text-blue-500">{prediction.home_score}-{prediction.away_score}</span>
-                : <span className="text-xs text-gray-400">🔒</span>}
-            </div>
-            <div className="flex items-center gap-2 flex-1">
-              <span className="font-bold text-gray-900 dark:text-white text-sm">{awayTeam?.short_name}</span>
-              {awayTeam?.flag_url && <img src={awayTeam.flag_url} className="w-7 h-5 object-cover rounded"/>}
-            </div>
+        <div className="p-3 flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-1 justify-end">
+            {homeTeam?.flag_url && <img src={homeTeam.flag_url} className="w-7 h-5 object-cover rounded"/>}
+            <span className="font-bold text-gray-900 dark:text-white text-sm">{homeTeam?.short_name}</span>
+          </div>
+          <div className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-xl min-w-[70px] text-center">
+            {hasPred ? <span className="text-sm font-black text-blue-500">{prediction.home_score}-{prediction.away_score}</span>
+              : <span className="text-xs text-gray-400">🔒</span>}
+          </div>
+          <div className="flex items-center gap-2 flex-1">
+            <span className="font-bold text-gray-900 dark:text-white text-sm">{awayTeam?.short_name}</span>
+            {awayTeam?.flag_url && <img src={awayTeam.flag_url} className="w-7 h-5 object-cover rounded"/>}
           </div>
         </div>
       ) : (
@@ -219,7 +197,6 @@ export default function CaminoPage() {
   const predMap = useMemo(() => new Map(predictions.map(p => [p.match_id, p])), [predictions])
   const groupMatches = useMemo(() => matches.filter(m => m.stage?.type === 'group'), [matches])
 
-  // Standings por grupo
   const groupStandings = useMemo(() => {
     const s: Record<string, any[]> = {}
     GROUPS.forEach(g => { s[g] = calcStandings(groupMatches, predMap, g) })
@@ -231,17 +208,48 @@ export default function CaminoPage() {
     return gm.length > 0 && gm.every(m => predMap.has(m.id))
   }
 
-  // Mejores terceros (ordenados por pts, gd, gf)
-  const bestThirds = useMemo(() => {
-    const thirds = GROUPS.map(g => {
+  // Calcular mejores terceros con lógica oficial FIFA
+  // ordenados: pts DESC, gd DESC, gf DESC
+  const allThirds = useMemo(() => {
+    return GROUPS.map(g => {
       const standings = groupStandings[g]
-      return standings?.[2] ? { ...standings[2], group: g } : null
+      const third = standings?.[2]
+      if (!third) return null
+      return { ...third, group: g }
     }).filter(Boolean) as any[]
-
-    return thirds
-      .sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf)
-      .slice(0, 8)
   }, [groupStandings])
+
+  const sortedThirds = useMemo(() => {
+    return [...allThirds].sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf)
+  }, [allThirds])
+
+  // Resolver equipo para un slot de R32
+  // Asigna mejores terceros de los grupos especificados en orden de ranking
+  const resolveBestThird = useMemo(() => {
+    const assigned = new Set<string>()
+    const thirdsSlots: Record<string, any> = {}
+
+    // Procesar todos los slots que requieren terceros en orden
+    const thirdsMatches = R32_OFFICIAL.filter(m => (m.away as any).thirds || (m.home as any).thirds)
+
+    // Para cada slot, asignar el mejor tercero disponible de los grupos permitidos
+    thirdsMatches.forEach(slot => {
+      const thirdsKey = (m: any) => (m.thirds ? m.thirds.join('') : null)
+      const homeThirds = (slot.home as any).thirds as string[] | undefined
+      const awayThirds = (slot.away as any).thirds as string[] | undefined
+      const thirdsGroups = homeThirds || awayThirds
+
+      if (!thirdsGroups) return
+
+      const best = sortedThirds.find(t => thirdsGroups.includes(t.group) && !assigned.has(t.id))
+      if (best) {
+        assigned.add(best.id)
+        thirdsSlots[slot.idx + '_' + (homeThirds ? 'home' : 'away')] = best
+      }
+    })
+
+    return thirdsSlots
+  }, [sortedThirds])
 
   // Partidos por fase
   const r32Matches = useMemo(() => matches.filter(m => m.stage?.type === 'round_of_32').sort((a,b) => a.match_number - b.match_number), [matches])
@@ -252,28 +260,33 @@ export default function CaminoPage() {
   const finalMatch = useMemo(() => matches.find(m => m.stage?.type === 'final'), [matches])
 
   // R32 con equipos reales
-  const r32WithTeams = useMemo(() => {
-    const fixed = R32_FIXED.map(s => {
-      const match = r32Matches[s.idx]
-      const homeDone = isGroupDone(s.home.g)
-      const awayDone = isGroupDone(s.away.g)
-      const homeTeam = homeDone ? groupStandings[s.home.g]?.[s.home.r - 1] : null
-      const awayTeam = awayDone ? groupStandings[s.away.g]?.[s.away.r - 1] : null
-      return { ...s, match, homeTeam, awayTeam }
-    })
+  const r32WithTeams = useMemo(() => R32_OFFICIAL.map(slot => {
+    const match = r32Matches[slot.idx]
+    const homeSpec = slot.home as any
+    const awaySpec = slot.away as any
 
-    const thirds = R32_THIRDS.map(s => {
-      const match = r32Matches[s.idx]
-      const homeTeam = bestThirds[s.homeThird] ?? null
-      const awayTeam = bestThirds[s.awayThird] ?? null
-      return { ...s, match, homeTeam, awayTeam }
-    })
+    let homeTeam = null
+    let awayTeam = null
 
-    return [...fixed, ...thirds]
-  }, [r32Matches, groupStandings, bestThirds])
+    if (homeSpec.g) {
+      const done = isGroupDone(homeSpec.g)
+      homeTeam = done ? groupStandings[homeSpec.g]?.[homeSpec.r - 1] ?? null : null
+    } else if (homeSpec.thirds) {
+      homeTeam = resolveBestThird[slot.idx + '_home'] ?? null
+    }
+
+    if (awaySpec.g) {
+      const done = isGroupDone(awaySpec.g)
+      awayTeam = done ? groupStandings[awaySpec.g]?.[awaySpec.r - 1] ?? null : null
+    } else if (awaySpec.thirds) {
+      awayTeam = resolveBestThird[slot.idx + '_away'] ?? null
+    }
+
+    return { ...slot, match, homeTeam, awayTeam }
+  }), [r32Matches, groupStandings, resolveBestThird])
 
   const totalGroupsDone = GROUPS.filter(isGroupDone).length
-  const allGroupsDone = totalGroupsDone === 12
+  const bestThirds8 = sortedThirds.slice(0, 8)
 
   const finalPred = finalMatch ? predMap.get(finalMatch.id) : null
   const champion = finalPred && finalMatch?.home_team?.short_name !== 'TBD'
@@ -289,9 +302,7 @@ export default function CaminoPage() {
     final: finalMatch && predMap.has(finalMatch.id) ? 1 : 0,
   }
 
-  const stageTotals: Record<string, number> = {
-    r32: 16, r16: 8, qf: 4, sf: 2, tp: 1, final: 1
-  }
+  const stageTotals: Record<string, number> = { r32: 16, r16: 8, qf: 4, sf: 2, tp: 1, final: 1 }
 
   if (loading) return (
     <div className="space-y-3">
@@ -326,23 +337,23 @@ export default function CaminoPage() {
       {activeStage === 'r32' && totalGroupsDone > 0 && (
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
           <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <p className="text-sm font-bold text-gray-900 dark:text-white">🥉 Mejores Terceros ({bestThirds.length}/8 definidos)</p>
-            {!allGroupsDone && <p className="text-xs text-gray-400">Completa todos los grupos</p>}
+            <p className="text-sm font-bold text-gray-900 dark:text-white">🥉 Mejores Terceros ({bestThirds8.length}/8)</p>
+            {totalGroupsDone < 12 && <p className="text-xs text-gray-400">{totalGroupsDone}/12 grupos</p>}
           </div>
           <div className="divide-y divide-gray-100 dark:divide-gray-800">
-            {bestThirds.map((team: any, i: number) => (
+            {bestThirds8.map((team: any, i: number) => (
               <div key={team.id} className="flex items-center gap-3 px-4 py-2">
                 <span className="text-xs font-black text-purple-500 w-4">{i+1}</span>
                 {team.flag_url && <img src={team.flag_url} className="w-6 h-4 object-cover rounded flex-shrink-0"/>}
                 <span className="text-sm text-gray-900 dark:text-white font-medium flex-1">{team.name}</span>
-                <span className="text-xs text-gray-400">Grupo {team.group}</span>
-                <span className="text-xs font-bold text-gray-500 w-6 text-center">{team.gd > 0 ? '+' : ''}{team.gd}</span>
+                <span className="text-xs text-gray-400 px-1.5 bg-gray-100 dark:bg-gray-800 rounded-full">Grupo {team.group}</span>
+                <span className="text-xs text-gray-400 w-8 text-center">{team.gd > 0 ? '+' : ''}{team.gd}</span>
                 <span className="text-sm font-black text-gray-900 dark:text-white w-6 text-right">{team.pts}</span>
               </div>
             ))}
-            {Array.from({length: 8 - bestThirds.length}).map((_, i) => (
+            {Array.from({length: Math.max(0, 8 - bestThirds8.length)}).map((_, i) => (
               <div key={i} className="flex items-center gap-3 px-4 py-2 opacity-30">
-                <span className="text-xs font-black text-gray-400 w-4">{bestThirds.length + i + 1}</span>
+                <span className="text-xs font-black text-gray-400 w-4">{bestThirds8.length + i + 1}</span>
                 <div className="w-6 h-4 bg-gray-200 dark:bg-gray-700 rounded"/>
                 <span className="text-sm text-gray-400 flex-1">Por definir</span>
               </div>
@@ -471,7 +482,7 @@ export default function CaminoPage() {
             onSave={savePrediction}
             pts={15}
             isLocked={!isPredictionsOpen || finalMatch.is_locked}
-            label="Gran Final"
+            label="Gran Final 🏆"
           />
         </div>
       )}
