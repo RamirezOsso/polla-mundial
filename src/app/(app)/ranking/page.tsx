@@ -29,12 +29,13 @@ export default function RankingPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-black text-gray-900 dark:text-white">Ranking</h1>
+        <h1 className="text-2xl font-black text-gray-900 dark:text-white">📊 Ranking</h1>
         <span className="text-sm text-gray-500">{count} participantes</span>
       </div>
 
+      {/* Sistema de puntos */}
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4">
-        <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3">Sistema de puntos</h3>
+        <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3">⭐ Sistema de puntos</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {[
             { label: 'Marcador exacto', pts: '5 pts', color: 'text-green-600 dark:text-green-400', icon: '🎯' },
@@ -53,15 +54,19 @@ export default function RankingPage() {
         <p className="text-xs text-gray-400 mt-2">Desempate: puntos, exactos, acertados, fecha</p>
       </div>
 
+      {/* Tabla */}
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
+        {/* Header */}
         <div className="flex items-center px-4 py-2 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <span className="w-10 text-xs font-bold text-gray-400">#</span>
           <span className="flex-1 text-xs font-bold text-gray-400">Jugador</span>
-          <span className="w-14 text-center text-xs font-bold text-gray-400">Pts</span>
-          <span className="w-10 text-center text-xs font-bold text-green-500">🎯</span>
-          <span className="w-10 text-center text-xs font-bold text-blue-500">✅</span>
-          <span className="w-10 text-center text-xs font-bold text-red-500">❌</span>
-          <span className="w-12 text-center text-xs font-bold text-purple-500">%</span>
+          <span className="w-16 text-center text-xs font-bold text-gray-400">Pts</span>
+          {/* Columnas extras solo en desktop */}
+          <span className="hidden sm:block w-10 text-center text-xs font-bold text-green-500">🎯</span>
+          <span className="hidden sm:block w-10 text-center text-xs font-bold text-blue-500">✅</span>
+          <span className="hidden sm:block w-10 text-center text-xs font-bold text-red-500">❌</span>
+          <span className="hidden sm:block w-12 text-center text-xs font-bold text-purple-500">%</span>
+          <span className="w-8 text-center text-xs font-bold text-gray-400 sm:hidden">→</span>
         </div>
 
         {loading ? (
@@ -82,36 +87,44 @@ export default function RankingPage() {
               const failed = Math.max(0, r.total_predictions - r.exact_scores - r.correct_results)
               return (
                 <button key={r.id} onClick={() => setSelected(r)}
-                  className={`w-full flex items-center px-4 py-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-800 ${isMe ? 'bg-green-50 dark:bg-green-500/5' : 'bg-white dark:bg-gray-900'}`}>
+                  className={`w-full flex items-center px-4 py-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-800 active:bg-gray-100 dark:active:bg-gray-700 ${isMe ? 'bg-green-50 dark:bg-green-500/5' : 'bg-white dark:bg-gray-900'}`}>
+                  {/* Posición */}
                   <div className="w-10 flex-shrink-0">
                     {r.rank && r.rank <= 3
                       ? <span className="text-xl">{getRankBadge(r.rank)}</span>
                       : <span className="text-sm font-bold text-gray-400">#{r.rank}</span>}
                   </div>
+                  {/* Jugador */}
                   <div className="flex-1 flex items-center gap-2 min-w-0">
                     <Avatar src={r.profile?.avatar_url} name={r.profile?.display_name || r.profile?.username} size="sm"/>
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                         {r.profile?.display_name || r.profile?.username}
-                        {isMe && <span className="ml-1 text-green-600 dark:text-green-400 text-xs">(Tu)</span>}
+                        {isMe && <span className="ml-1 text-green-600 dark:text-green-400 text-xs">(Tú)</span>}
                       </p>
-                      {r.profile?.country && <p className="text-xs text-gray-400 truncate">{r.profile.country}</p>}
+                      {r.profile?.country && <p className="text-xs text-gray-400 truncate hidden sm:block">{r.profile.country}</p>}
                     </div>
                   </div>
-                  <div className="w-14 text-center flex-shrink-0">
+                  {/* Puntos - siempre visible */}
+                  <div className="w-16 text-center flex-shrink-0">
                     <span className="text-base font-black text-gray-900 dark:text-white">{r.total_points}</span>
                   </div>
-                  <div className="w-10 text-center flex-shrink-0">
+                  {/* Stats - solo desktop */}
+                  <div className="hidden sm:block w-10 text-center flex-shrink-0">
                     <span className="text-sm font-bold text-green-600 dark:text-green-400">{r.exact_scores}</span>
                   </div>
-                  <div className="w-10 text-center flex-shrink-0">
+                  <div className="hidden sm:block w-10 text-center flex-shrink-0">
                     <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{r.correct_results}</span>
                   </div>
-                  <div className="w-10 text-center flex-shrink-0">
+                  <div className="hidden sm:block w-10 text-center flex-shrink-0">
                     <span className="text-sm font-bold text-red-500">{failed}</span>
                   </div>
-                  <div className="w-12 text-center flex-shrink-0">
+                  <div className="hidden sm:block w-12 text-center flex-shrink-0">
                     <span className="text-sm font-bold text-purple-600 dark:text-purple-400">{getEfficiency(r)}%</span>
+                  </div>
+                  {/* Flecha - solo móvil */}
+                  <div className="w-8 text-center flex-shrink-0 sm:hidden">
+                    <span className="text-gray-300 dark:text-gray-600 text-sm">›</span>
                   </div>
                 </button>
               )
@@ -120,20 +133,22 @@ export default function RankingPage() {
         )}
       </div>
 
+      {/* Paginación */}
       {count > pageSize && (
         <div className="flex items-center justify-center gap-3">
           <button disabled={page === 1} onClick={() => setPage(p => p - 1)}
             className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-600 dark:text-gray-300 disabled:opacity-40">
-            Anterior
+            ← Anterior
           </button>
           <span className="text-sm text-gray-500">Pagina {page} de {Math.ceil(count / pageSize)}</span>
           <button disabled={page >= Math.ceil(count / pageSize)} onClick={() => setPage(p => p + 1)}
             className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-600 dark:text-gray-300 disabled:opacity-40">
-            Siguiente
+            Siguiente →
           </button>
         </div>
       )}
 
+      {/* Modal detalle */}
       <Modal open={!!selected} onClose={() => setSelected(null)}
         title={selected?.profile?.display_name || selected?.profile?.username || ''}>
         {selected && (
@@ -143,7 +158,8 @@ export default function RankingPage() {
               <div>
                 <p className="text-xl font-black text-gray-900 dark:text-white">{selected.profile?.display_name || selected.profile?.username}</p>
                 <p className="text-gray-500 text-sm">Puesto {getRankBadge(selected.rank)}</p>
-                {selected.profile?.favorite_team && <p className="text-xs text-gray-400 mt-1">{selected.profile.favorite_team}</p>}
+                {selected.profile?.favorite_team && <p className="text-xs text-gray-400 mt-1">❤️ {selected.profile.favorite_team}</p>}
+                {selected.profile?.country && <p className="text-xs text-gray-400">🌍 {selected.profile.country}</p>}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
