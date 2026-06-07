@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { useMatches } from '@/hooks/useMatches'
 import { usePredictions } from '@/hooks/usePredictions'
+import { assignThirdsOfficially } from '@/lib/fifaThirds'
 
 const GROUPS = 'ABCDEFGHIJKL'.split('')
 
@@ -241,18 +242,22 @@ export default function CaminoPage() {
   , [allThirds])
 
   const assignedThirds = useMemo(() => {
-    const assigned = new Set<string>()
+    const bestThirds = sortedThirds.slice(0, 8)
+    const qualifiedGroups = bestThirds.map((t: any) => t.group)
+    const teamsByGroup: Record<string, any> = {}
+    bestThirds.forEach((t: any) => { teamsByGroup[t.group] = t })
+    const officialMap = assignThirdsOfficially(qualifiedGroups, teamsByGroup)
     const result: Record<string, any> = {}
     R32_OFFICIAL.forEach(slot => {
-      const awaySpec = slot.away as any
       const homeSpec = slot.home as any
-      if (awaySpec.thirds) {
-        const best = sortedThirds.find(t => awaySpec.thirds.includes(t.group) && !assigned.has(t.id))
-        if (best) { assigned.add(best.id); result[`${slot.idx}_away`] = best }
+      const awaySpec = slot.away as any
+      if (awaySpec.thirds && homeSpec.g) {
+        const assigned = officialMap[homeSpec.g]
+        if (assigned) result[`${slot.idx}_away`] = assigned
       }
-      if (homeSpec.thirds) {
-        const best = sortedThirds.find(t => homeSpec.thirds.includes(t.group) && !assigned.has(t.id))
-        if (best) { assigned.add(best.id); result[`${slot.idx}_home`] = best }
+      if (homeSpec.thirds && awaySpec.g) {
+        const assigned = officialMap[awaySpec.g]
+        if (assigned) result[`${slot.idx}_home`] = assigned
       }
     })
     return result
