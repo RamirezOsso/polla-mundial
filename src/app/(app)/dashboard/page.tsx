@@ -35,6 +35,12 @@ export default function DashboardPage() {
   const failed = calculated.filter(p => p.points_earned === 0).length
   const pct = calculated.length > 0 ? Math.round(((exact + correct) / calculated.length) * 100) : 0
 
+  const prizeRules = [
+    { pos: '🥇 1er Puesto', pct: '60%', color: 'from-yellow-500 to-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-500/10', border: 'border-yellow-200 dark:border-yellow-500/30' },
+    { pos: '🥈 2do Puesto', pct: '25%', color: 'from-gray-400 to-gray-300', bg: 'bg-gray-50 dark:bg-gray-800', border: 'border-gray-200 dark:border-gray-700' },
+    { pos: '🥉 3er Puesto', pct: '15%', color: 'from-amber-600 to-amber-500', bg: 'bg-amber-50 dark:bg-amber-500/10', border: 'border-amber-200 dark:border-amber-500/30' },
+  ]
+
   return (
     <div className="space-y-6">
       {/* Hero */}
@@ -69,6 +75,56 @@ export default function DashboardPage() {
             <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">{s.label}</div>
           </div>
         ))}
+      </div>
+
+      {/* Premiación */}
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
+        <div className="px-4 py-3 bg-gradient-to-r from-yellow-500/10 to-green-500/10 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-black text-gray-900 dark:text-white">🏆 Premiación</h2>
+            <p className="text-xs text-gray-500 mt-0.5">Distribución del pozo acumulado</p>
+          </div>
+          <span className="text-xs text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
+            En caso de empate se divide
+          </span>
+        </div>
+        <div className="p-4 grid grid-cols-3 gap-3">
+          {prizeRules.map(r => (
+            <div key={r.pos} className={`${r.bg} border ${r.border} rounded-2xl p-3 text-center`}>
+              <p className="text-xs text-gray-500 mb-1">{r.pos}</p>
+              <p className={`text-2xl font-black bg-gradient-to-r ${r.color} bg-clip-text text-transparent`}>{r.pct}</p>
+              <p className="text-xs text-gray-400 mt-1">del pozo</p>
+            </div>
+          ))}
+        </div>
+        <div className="px-4 pb-4">
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
+            <p className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">📋 Sistema de calificación</p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+              {[
+                { label: '🎯 Marcador exacto', pts: '+5 pts' },
+                { label: '✅ Resultado correcto', pts: '+3 pts' },
+                { label: '⚽ Clasif. Octavos/R32', pts: '+5 pts' },
+                { label: '⚽ Clasif. Cuartos', pts: '+7 pts' },
+                { label: '⭐ Clasif. Semis', pts: '+10 pts' },
+                { label: '🏆 Campeón acertado', pts: '+25 pts' },
+              ].map(r => (
+                <div key={r.label} className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500">{r.label}</span>
+                  <span className="text-xs font-black text-green-600 dark:text-green-400">{r.pts}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+              <p className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">⚖️ Criterios de desempate</p>
+              <div className="flex flex-wrap gap-1.5">
+                {['1. Puntos', '2. Exactos', '3. Correctos', '4. Campeón', '5. Finalistas', '6. Efectividad %', '7. Decisión participantes'].map((c, i) => (
+                  <span key={i} className="text-xs bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">{c}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Partidos de hoy */}
