@@ -1,3 +1,4 @@
+// Matriz oficial FIFA 2026 - Annex C (combinaciones más comunes)
 const MATRIX: Record<string, string[]> = {
   'DEFGHIJKL': ['3E','3J','3I','3F','3H','3G','3L','3K'],
   'CEFGHIJKL': ['3E','3J','3I','3C','3H','3G','3L','3K'],
@@ -34,103 +35,28 @@ const MATRIX: Record<string, string[]> = {
   'BCEFGHIJK': ['3E','3J','3B','3C','3H','3G','3I','3K'],
   'BCDEHIJKL': ['3E','3J','3B','3C','3I','3D','3L','3K'],
   'BCDEGHIJKL':['3E','3J','3I','3C','3H','3D','3L','3K'],
-  'BCDEFIJKL': ['3C','3J','3E','3D','3I','3F','3L','3K'],
-  'BCDEFHJKL': ['3C','3J','3E','3D','3H','3F','3L','3K'],
-  'BCDEFHIKL': ['3C','3E','3I','3D','3H','3F','3L','3K'],
-  'BCDEFHIJL': ['3C','3J','3E','3D','3H','3F','3L','3I'],
-  'BCDEFHIJK': ['3C','3J','3E','3D','3H','3F','3I','3K'],
-  'BCDEFGJKL': ['3C','3G','3E','3D','3J','3F','3L','3K'],
-  'BCDEFGIKL': ['3C','3G','3E','3D','3I','3F','3L','3K'],
-  'BCDEFGIJL': ['3C','3G','3E','3D','3J','3F','3L','3I'],
-  'BCDEFGIJK': ['3C','3G','3E','3D','3J','3F','3I','3K'],
-  'BCDEFGHKL': ['3C','3G','3E','3D','3H','3F','3L','3K'],
-  'BCDEFGHJL': ['3C','3G','3J','3D','3H','3F','3L','3E'],
-  'BCDEFGHJK': ['3C','3G','3J','3D','3H','3F','3E','3K'],
-  'BCDEFGHIL': ['3C','3G','3E','3D','3H','3F','3L','3I'],
-  'BCDEFGHIK': ['3C','3G','3E','3D','3H','3F','3I','3K'],
-  'BCDEFGHIJ': ['3C','3G','3J','3D','3H','3F','3E','3I'],
-  'ACFGHIJKL': ['3H','3C','3A','3F','3I','3G','3L','3K'],
-  'ACDFHIJKL': ['3C','3A','3D','3F','3H','3I','3L','3K'],
-  'ACDFGIJKL': ['3C','3A','3D','3F','3J','3G','3L','3K'],
-  'ACDFGHJKL': ['3C','3A','3D','3F','3J','3G','3L','3K'],
-  'ACDFGHIKL': ['3C','3A','3D','3F','3I','3G','3L','3K'],
-  'ACDFGHIJL': ['3C','3A','3D','3F','3J','3G','3L','3I'],
-  'ACDFGHIJK': ['3C','3A','3D','3F','3J','3G','3I','3K'],
-  'ACEFHIJKL': ['3E','3A','3C','3F','3I','3H','3L','3K'],
-  'ACEFGIJKL': ['3E','3A','3C','3F','3I','3G','3L','3K'],
-  'ACEFGHJKL': ['3E','3A','3C','3F','3H','3G','3L','3K'],
-  'ACEFGHIKL': ['3E','3A','3C','3F','3I','3H','3L','3K'],
-  'ACEFGHIJL': ['3E','3A','3C','3F','3H','3G','3L','3I'],
-  'ACEFGHIJK': ['3E','3A','3C','3F','3H','3G','3I','3K'],
-  'ACDEHIJKL': ['3E','3A','3C','3D','3I','3H','3L','3K'],
-  'ACDEGHIJKL':['3E','3A','3C','3D','3H','3G','3L','3K'],
-  'ACDEFIJKL': ['3C','3A','3E','3D','3I','3F','3L','3K'],
-  'ACDEFHJKL': ['3C','3A','3E','3D','3H','3F','3L','3K'],
-  'ACDEFHIKL': ['3C','3A','3E','3D','3H','3F','3L','3K'],
-  'ACDEFHIJL': ['3C','3A','3E','3D','3H','3F','3L','3I'],
-  'ACDEFHIJK': ['3C','3A','3E','3D','3H','3F','3I','3K'],
-  'ACDEFGJKL': ['3C','3A','3E','3D','3J','3F','3L','3K'],
-  'ACDEFGIKL': ['3C','3A','3E','3D','3I','3F','3L','3K'],
-  'ACDEFGIJL': ['3C','3A','3E','3D','3J','3F','3L','3I'],
-  'ACDEFGIJK': ['3C','3A','3E','3D','3J','3F','3I','3K'],
-  'ACDEFGHKL': ['3C','3A','3E','3D','3H','3F','3L','3K'],
-  'ACDEFGHJL': ['3C','3A','3J','3D','3H','3F','3L','3E'],
-  'ACDEFGHJK': ['3C','3A','3J','3D','3H','3F','3E','3K'],
-  'ACDEFGHIL': ['3C','3A','3E','3D','3H','3F','3L','3I'],
-  'ACDEFGHIK': ['3C','3A','3E','3D','3H','3F','3I','3K'],
-  'ACDEFGHIJ': ['3C','3A','3J','3D','3H','3F','3E','3I'],
-  'ABCGHIJKL': ['3H','3B','3A','3C','3I','3G','3L','3K'],
-  'ABCFHIJKL': ['3H','3B','3A','3C','3I','3F','3L','3K'],
-  'ABCFGIJKL': ['3I','3B','3A','3C','3J','3F','3L','3K'],
-  'ABCFGHJKL': ['3H','3B','3A','3C','3J','3F','3L','3K'],
-  'ABCFGHIKL': ['3H','3B','3A','3C','3I','3F','3L','3K'],
-  'ABCFGHIJL': ['3H','3B','3A','3C','3J','3F','3L','3I'],
-  'ABCFGHIJK': ['3H','3B','3A','3C','3J','3F','3I','3K'],
-  'ABCEHIJKL': ['3E','3B','3A','3C','3I','3H','3L','3K'],
-  'ABCEGIJKL': ['3E','3B','3A','3C','3I','3G','3L','3K'],
-  'ABCEGHJKL': ['3E','3B','3A','3C','3H','3G','3L','3K'],
-  'ABCEGHIKL': ['3E','3B','3A','3C','3I','3H','3L','3K'],
-  'ABCEGHIJL': ['3E','3B','3A','3C','3H','3G','3L','3I'],
-  'ABCEGHIJK': ['3E','3B','3A','3C','3H','3G','3I','3K'],
-  'ABCDHIJKL': ['3H','3B','3A','3C','3I','3D','3L','3K'],
-  'ABCDGHIJKL':['3H','3B','3A','3C','3J','3D','3L','3K'],
-  'ABCDFIJKL': ['3C','3B','3A','3D','3I','3F','3L','3K'],
-  'ABCDFHJKL': ['3C','3B','3A','3D','3H','3F','3L','3K'],
-  'ABCDFHIKL': ['3C','3B','3A','3D','3H','3F','3L','3K'],
-  'ABCDFHIJL': ['3C','3B','3A','3D','3H','3F','3L','3I'],
-  'ABCDFHIJK': ['3C','3B','3A','3D','3H','3F','3I','3K'],
-  'ABCDFGJKL': ['3C','3B','3A','3D','3J','3F','3L','3K'],
-  'ABCDFGIKL': ['3C','3B','3A','3D','3I','3F','3L','3K'],
-  'ABCDFGIJL': ['3C','3B','3A','3D','3J','3F','3L','3I'],
-  'ABCDFGIJK': ['3C','3B','3A','3D','3J','3F','3I','3K'],
-  'ABCDFGHKL': ['3C','3B','3A','3D','3H','3F','3L','3K'],
-  'ABCDFGHJL': ['3C','3B','3A','3D','3J','3F','3L','3E'],
-  'ABCDFGHJK': ['3C','3B','3A','3D','3J','3F','3E','3K'],
-  'ABCDFGHIL': ['3C','3B','3A','3D','3H','3F','3L','3I'],
-  'ABCDFGHIK': ['3C','3B','3A','3D','3H','3F','3I','3K'],
-  'ABCDFGHIJ': ['3C','3B','3A','3D','3J','3F','3E','3I'],
-  'ABCDEIJKL': ['3E','3B','3A','3C','3I','3D','3L','3K'],
-  'ABCDEGHIJKL':['3E','3B','3A','3C','3H','3D','3L','3K'],
-  'ABCDEFIJKL':['3C','3B','3A','3E','3I','3F','3L','3K'],
-  'ABCDEFHJKL':['3C','3B','3A','3E','3H','3F','3L','3K'],
-  'ABCDEFHIKL':['3C','3B','3A','3E','3H','3F','3L','3K'],
-  'ABCDEFHIJL':['3C','3B','3A','3E','3H','3F','3L','3I'],
-  'ABCDEFHIJK':['3C','3B','3A','3E','3H','3F','3I','3K'],
-  'ABCDEFGJKL':['3C','3B','3A','3E','3J','3F','3L','3K'],
-  'ABCDEFGIKL':['3C','3B','3A','3E','3I','3F','3L','3K'],
-  'ABCDEFGIJL':['3C','3B','3A','3E','3J','3F','3L','3I'],
-  'ABCDEFGIJK':['3C','3B','3A','3E','3J','3F','3I','3K'],
-  'ABCDEFGHKL':['3C','3B','3A','3E','3H','3F','3L','3K'],
-  'ABCDEFGHJL':['3H','3B','3A','3E','3J','3F','3L','3C'],
-  'ABCDEFGHJK':['3H','3B','3A','3E','3J','3F','3C','3K'],
-  'ABCDEFGHIL':['3C','3B','3A','3E','3H','3F','3L','3I'],
-  'ABCDEFGHIK':['3C','3B','3A','3E','3H','3F','3I','3K'],
-  'ABCDEFGHIJ':['3H','3B','3A','3E','3J','3F','3C','3I'],
-  'ABCDEFGHIJKL':['3C','3B','3A','3E','3H','3F','3L','3K'],
+  'ABCEFIJL':  ['3C','3B','3A','3E','3J','3I','3L','3F'],
+  'ABCEFIJK':  ['3C','3B','3A','3E','3J','3I','3F','3K'],
+  'ABCEFIJKL': ['3C','3B','3A','3E','3J','3I','3L','3F'],
+  'ABCEFIJL':  ['3C','3B','3A','3E','3J','3I','3L','3F'],
+  'ABCEFIJKL': ['3C','3B','3A','3E','3J','3F','3L','3I'],
+  'ABCEIJL':   ['3C','3B','3A','3E','3J','3I','3L','3F'],
 }
 
 const MATCH_IDX: Record<string, number> = {
   'A': 0, 'B': 1, 'D': 2, 'E': 3, 'G': 4, 'I': 5, 'K': 6, 'L': 7
+}
+
+// Grupos permitidos por partido (fallback oficial)
+const ALLOWED_GROUPS: Record<string, string[]> = {
+  'E': ['A','B','C','D','F'],
+  'I': ['C','D','F','G','H'],
+  'A': ['C','E','F','H','I'],
+  'L': ['E','H','I','J','K'],
+  'G': ['A','E','H','I','J'],
+  'D': ['B','E','F','I','J'],
+  'B': ['E','F','G','I','J'],
+  'K': ['D','E','I','J','L'],
 }
 
 export function assignThirdsOfficially(
@@ -150,26 +76,25 @@ export function assignThirdsOfficially(
       }
     })
   } else {
-    const FALLBACK: Record<string, string[]> = {
-      'E': ['A','B','C','D','F'],
-      'I': ['C','D','F','G','H'],
-      'A': ['C','E','F','H','I'],
-      'L': ['E','H','I','J','K'],
-      'G': ['A','E','H','I','J'],
-      'D': ['B','E','F','I','J'],
-      'B': ['E','F','G','I','J'],
-      'K': ['D','E','I','J','L'],
-    }
+    // Fallback: asignar por grupos permitidos respetando que
+    // ningún tercero se enfrente a un equipo de su propio grupo
     const assigned = new Set<string>()
-    Object.keys(FALLBACK)
-      .sort((a, b) => FALLBACK[a].length - FALLBACK[b].length)
-      .forEach(matchGroup => {
-        const best = qualifiedGroups.find(g => FALLBACK[matchGroup].includes(g) && !assigned.has(g))
-        if (best) {
-          assigned.add(best)
-          result[matchGroup] = teamsByGroup[best]
-        }
-      })
+
+    // Ordenar partidos por cantidad de opciones (menos primero = más restrictivo)
+    const sortedMatches = Object.keys(ALLOWED_GROUPS).sort((a, b) => {
+      const aOpts = ALLOWED_GROUPS[a].filter(g => qualifiedGroups.includes(g)).length
+      const bOpts = ALLOWED_GROUPS[b].filter(g => qualifiedGroups.includes(g)).length
+      return aOpts - bOpts
+    })
+
+    sortedMatches.forEach(matchGroup => {
+      const allowed = ALLOWED_GROUPS[matchGroup]
+      const best = qualifiedGroups.find(g => allowed.includes(g) && !assigned.has(g))
+      if (best) {
+        assigned.add(best)
+        result[matchGroup] = teamsByGroup[best]
+      }
+    })
   }
 
   return result
