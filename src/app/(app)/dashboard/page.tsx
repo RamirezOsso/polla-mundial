@@ -82,7 +82,7 @@ export default function DashboardPage() {
         <div className="px-4 py-3 bg-gradient-to-r from-yellow-500/10 to-green-500/10 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
           <div>
             <h2 className="text-sm font-black text-gray-900 dark:text-white">🏆 Premiación</h2>
-            <p className="text-xs text-gray-500 mt-0.5">Distribución del pozo acumulado</p>
+            <p className="text-xs text-gray-500 mt-0.5">Distribución del total recaudado acumulado</p>
           </div>
           <span className="text-xs text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
             En caso de empate se divide
@@ -93,7 +93,7 @@ export default function DashboardPage() {
             <div key={r.pos} className={`${r.bg} border ${r.border} rounded-2xl p-3 text-center`}>
               <p className="text-xs text-gray-500 mb-1">{r.pos}</p>
               <p className={`text-2xl font-black bg-gradient-to-r ${r.color} bg-clip-text text-transparent`}>{r.pct}</p>
-              <p className="text-xs text-gray-400 mt-1">del pozo</p>
+              <p className="text-xs text-gray-400 mt-1">del total recaudado</p>
             </div>
           ))}
         </div>
