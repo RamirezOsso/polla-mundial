@@ -7,7 +7,7 @@ import { Modal } from '@/components/ui/Modal'
 import { Skeleton } from '@/components/ui/Skeleton'
 
 function getRankBadge(rank: number | null) {
-  if (!rank) return '?'
+  if (rank === null || rank === undefined) return '?'
   if (rank === 1) return '🥇'
   if (rank === 2) return '🥈'
   if (rank === 3) return '🥉'
@@ -51,7 +51,7 @@ export default function RankingPage() {
             </div>
           ))}
         </div>
-        <p className="text-xs text-gray-400 mt-2">Desempate: puntos, exactos, acertados, fecha</p>
+        <p className="text-xs text-gray-400 mt-2">Desempate: exactos → acertados → campeón → finalistas → efectividad</p>
       </div>
 
       {/* Tabla */}
