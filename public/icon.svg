@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#16a34a"/>
+  <circle cx="256" cy="220" r="130" fill="white"/>
+  <polygon points="256,110 290,140 278,180 234,180 222,140" fill="#111827"/>
+  <polygon points="256,330 290,300 330,312 330,355 290,370" fill="#111827"/>
+  <polygon points="256,330 222,300 182,312 182,355 222,370" fill="#111827"/>
+  <polygon points="140,175 160,210 148,250 108,250 96,212" fill="#111827"/>
+  <polygon points="372,175 352,210 364,250 404,250 416,212" fill="#111827"/>
+  <rect x="226" y="360" width="60" height="20" rx="5" fill="#fbbf24"/>
+  <rect x="206" y="376" width="100" height="16" rx="5" fill="#fbbf24"/>
+  <text x="256" y="470" font-family="Arial Black" font-size="52" font-weight="900" fill="white" text-anchor="middle">2026</text>
+</svg>
