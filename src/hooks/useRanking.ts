@@ -14,7 +14,7 @@ export function useGlobalRanking(page = 1, pageSize = 20) {
       const from = (page - 1) * pageSize
       const { data, count } = await supabase
         .from('global_ranking')
-        .select('*, profile:profiles(username, display_name, avatar_url, country, is_spectator)', { count: 'exact' })
+        .select('*, profile:profiles!inner(username, display_name, avatar_url, country, is_spectator)', { count: 'exact' })
         .eq('profile.is_spectator', false)
         .order('total_points', { ascending: false })
         .order('exact_scores', { ascending: false })
