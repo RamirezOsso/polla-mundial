@@ -109,6 +109,8 @@ export interface GlobalRanking {
   exact_scores: number
   correct_results: number
   total_predictions: number
+  champion_correct: boolean
+  finalists_correct: number
   rank: number | null
   previous_rank: number | null
   updated_at: string

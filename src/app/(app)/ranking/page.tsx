@@ -168,8 +168,10 @@ export default function RankingPage() {
                 { label: 'Predicciones', value: selected.total_predictions, icon: '📋', color: 'text-gray-500' },
                 { label: 'Exactos', value: selected.exact_scores, icon: '🎯', color: 'text-green-500' },
                 { label: 'Acertados', value: selected.correct_results, icon: '✅', color: 'text-blue-500' },
-                { label: 'Fallados', value: Math.max(0, selected.total_predictions - selected.exact_scores - selected.correct_results), icon: '❌', color: 'text-red-500' },
                 { label: 'Efectividad', value: `${getEfficiency(selected)}%`, icon: '📈', color: 'text-purple-500' },
+                { label: 'Campeón', value: selected.champion_correct ? '✅' : '❌', icon: '🏆', color: selected.champion_correct ? 'text-yellow-500' : 'text-gray-400' },
+                { label: 'Finalistas', value: `${selected.finalists_correct ?? 0}/2`, icon: '🥈', color: 'text-blue-500' },
+                { label: 'Fallados', value: Math.max(0, selected.total_predictions - selected.exact_scores - selected.correct_results), icon: '❌', color: 'text-red-500' },
               ].map(s => (
                 <div key={s.label} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 text-center">
                   <div className="text-xl mb-1">{s.icon}</div>
@@ -177,6 +179,25 @@ export default function RankingPage() {
                   <div className="text-xs text-gray-400 mt-0.5">{s.label}</div>
                 </div>
               ))}
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
+              <p className="text-xs font-bold text-gray-500 mb-2">Criterios de desempate</p>
+              <div className="space-y-1">
+                {[
+                  { n: 1, label: 'Total de puntos', value: selected.total_points },
+                  { n: 2, label: 'Marcadores exactos', value: selected.exact_scores },
+                  { n: 3, label: 'Resultados correctos', value: selected.correct_results },
+                  { n: 4, label: 'Campeón acertado', value: selected.champion_correct ? 'Sí ✅' : 'No ❌' },
+                  { n: 5, label: 'Finalistas acertados', value: `${selected.finalists_correct ?? 0}/2` },
+                  { n: 6, label: 'Efectividad', value: `${getEfficiency(selected)}%` },
+                  { n: 7, label: 'Decisión de participantes', value: '—' },
+                ].map(c => (
+                  <div key={c.n} className="flex items-center justify-between">
+                    <span className="text-xs text-gray-400">{c.n}. {c.label}</span>
+                    <span className="text-xs font-bold text-gray-900 dark:text-white">{c.value}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
