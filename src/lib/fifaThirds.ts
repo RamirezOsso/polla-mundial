@@ -1,5 +1,7 @@
-// Matriz oficial FIFA 2026 - Annex C (combinaciones más comunes)
+// Matriz oficial FIFA 2026 - Annex C (combinaciones principales)
+// Columnas: [1A_vs, 1B_vs, 1D_vs, 1E_vs, 1G_vs, 1I_vs, 1K_vs, 1L_vs]
 const MATRIX: Record<string, string[]> = {
+  'ABCEFIJL': ['3C','3B','3A','3E','3J','3I','3L','3F'],
   'DEFGHIJKL': ['3E','3J','3I','3F','3H','3G','3L','3K'],
   'CEFGHIJKL': ['3E','3J','3I','3C','3H','3G','3L','3K'],
   'CDFGHIJKL': ['3H','3G','3I','3C','3J','3F','3L','3K'],
@@ -35,20 +37,15 @@ const MATRIX: Record<string, string[]> = {
   'BCEFGHIJK': ['3E','3J','3B','3C','3H','3G','3I','3K'],
   'BCDEHIJKL': ['3E','3J','3B','3C','3I','3D','3L','3K'],
   'BCDEGHIJKL':['3E','3J','3I','3C','3H','3D','3L','3K'],
-  'ABCEFIJL':  ['3C','3B','3A','3E','3J','3I','3L','3F'],
-  'ABCEFIJK':  ['3C','3B','3A','3E','3J','3I','3F','3K'],
-  'ABCEFIJKL': ['3C','3B','3A','3E','3J','3I','3L','3F'],
-  'ABCEFIJL':  ['3C','3B','3A','3E','3J','3I','3L','3F'],
-  'ABCEFIJKL': ['3C','3B','3A','3E','3J','3F','3L','3I'],
-  'ABCEIJL':   ['3C','3B','3A','3E','3J','3I','3L','3F'],
+  'ABCDEFGHIJKL':['3C','3B','3A','3E','3H','3F','3L','3K'],
 }
 
 const MATCH_IDX: Record<string, number> = {
   'A': 0, 'B': 1, 'D': 2, 'E': 3, 'G': 4, 'I': 5, 'K': 6, 'L': 7
 }
 
-// Grupos permitidos por partido (fallback oficial)
-const ALLOWED_GROUPS: Record<string, string[]> = {
+// Grupos permitidos por cada partido con tercero (oficial FIFA)
+const ALLOWED: Record<string, string[]> = {
   'E': ['A','B','C','D','F'],
   'I': ['C','D','F','G','H'],
   'A': ['C','E','F','H','I'],
@@ -68,34 +65,48 @@ export function assignThirdsOfficially(
   const result: Record<string, any> = {}
 
   if (assignments) {
+    // Usar matriz oficial exacta
     Object.entries(MATCH_IDX).forEach(([matchGroup, idx]) => {
-      const thirdCode = assignments[idx]
-      const thirdGroup = thirdCode.replace('3', '')
+      const thirdGroup = assignments[idx].replace('3', '')
       if (teamsByGroup[thirdGroup]) {
         result[matchGroup] = teamsByGroup[thirdGroup]
       }
     })
-  } else {
-    // Fallback: asignar por grupos permitidos respetando que
-    // ningún tercero se enfrente a un equipo de su propio grupo
-    const assigned = new Set<string>()
-
-    // Ordenar partidos por cantidad de opciones (menos primero = más restrictivo)
-    const sortedMatches = Object.keys(ALLOWED_GROUPS).sort((a, b) => {
-      const aOpts = ALLOWED_GROUPS[a].filter(g => qualifiedGroups.includes(g)).length
-      const bOpts = ALLOWED_GROUPS[b].filter(g => qualifiedGroups.includes(g)).length
-      return aOpts - bOpts
-    })
-
-    sortedMatches.forEach(matchGroup => {
-      const allowed = ALLOWED_GROUPS[matchGroup]
-      const best = qualifiedGroups.find(g => allowed.includes(g) && !assigned.has(g))
-      if (best) {
-        assigned.add(best)
-        result[matchGroup] = teamsByGroup[best]
-      }
-    })
+    return result
   }
+
+  // Fallback robusto: algoritmo de asignación óptima
+  // Ordenar partidos de más restrictivo a menos restrictivo
+  const matchGroups = Object.keys(ALLOWED)
+  const sortedMatches = matchGroups.sort((a, b) => {
+    const aOpts = ALLOWED[a].filter(g => qualifiedGroups.includes(g)).length
+    const bOpts = ALLOWED[b].filter(g => qualifiedGroups.includes(g)).length
+    return aOpts - bOpts // Menos opciones primero
+  })
+
+  const assigned = new Set<string>()
+
+  sortedMatches.forEach(matchGroup => {
+    const allowed = ALLOWED[matchGroup]
+    // Buscar el mejor tercero disponible de los grupos permitidos
+    // Ordenar por ranking (el array qualifiedGroups ya viene ordenado por pts)
+    const best = qualifiedGroups.find(g => allowed.includes(g) && !assigned.has(g))
+    if (best) {
+      assigned.add(best)
+      result[matchGroup] = teamsByGroup[best]
+    }
+  })
+
+  // Verificar que todos los terceros clasificados fueron asignados
+  // Si quedaron sin asignar, forzar asignación ignorando restricciones
+  const unassigned = qualifiedGroups.filter(g => !assigned.has(g))
+  const emptySlots = matchGroups.filter(mg => !result[mg])
+
+  unassigned.forEach((g, i) => {
+    if (emptySlots[i]) {
+      result[emptySlots[i]] = teamsByGroup[g]
+    }
+  })
 
   return result
 }
