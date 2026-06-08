@@ -7,7 +7,9 @@ const withPWA = require('next-pwa')({
 })
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    turbo: undefined,
+  }
 };
 
 module.exports = withPWA(nextConfig)
