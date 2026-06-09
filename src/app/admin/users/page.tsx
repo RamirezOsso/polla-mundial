@@ -18,11 +18,22 @@ export default function AdminUsersPage() {
   useEffect(() => { loadUsers() }, [])
 
   const loadUsers = async () => {
-    const { data } = await createClient()
+    const supabase = createClient()
+    const { data: profiles } = await supabase
       .from('profiles')
       .select('*, global_ranking(total_points, rank)')
       .order('created_at', { ascending: false })
-    setUsers(data ?? [])
+    
+    // Obtener emails desde auth.users via admin
+    const { data: authUsers } = await supabase.rpc('get_users_email')
+    
+    const emailMap = new Map((authUsers ?? []).map((u: any) => [u.id, u.email]))
+    const usersWithEmail = (profiles ?? []).map((p: any) => ({
+      ...p,
+      email: emailMap.get(p.id) || ''
+    }))
+    
+    setUsers(usersWithEmail)
     setLoading(false)
   }
 
@@ -132,7 +143,7 @@ export default function AdminUsersPage() {
                     {user.is_spectator && <span className="text-xs bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 px-1.5 py-0.5 rounded-full">👀 Espectador</span>}
                     {user.is_active === false && <span className="text-xs bg-red-100 dark:bg-red-500/20 text-red-500 px-1.5 py-0.5 rounded-full">Inactivo</span>}
                   </div>
-                  <p className="text-xs text-gray-400">@{user.username} · {user.global_ranking?.[0]?.total_points ?? 0} pts · #{user.global_ranking?.[0]?.rank ?? '?'}</p>
+                  <p className="text-xs text-gray-400">@{user.username} · {user.email || ''}</p>
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0">
                   <button onClick={() => openModal(user, 'detail')} title="Ver detalle"
