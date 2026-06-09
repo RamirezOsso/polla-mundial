@@ -111,7 +111,7 @@ function MatchCard({ match, homeTeam, awayTeam, prediction, onSave, pts, isLocke
   const handleSave = async () => {
     if (home === '' || away === '' || Number(home) === Number(away)) return
     setSaving(true)
-    await onSave(match.id, Number(home), Number(away))
+    await onSave(match.id, Number(home), Number(away), homeTeam?.id, awayTeam?.id)
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)
     setSaving(false)
