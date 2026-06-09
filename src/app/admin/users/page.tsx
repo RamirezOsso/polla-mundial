@@ -32,7 +32,7 @@ export default function AdminUsersPage() {
     setLoadingPreds(true)
     const { data } = await createClient()
       .from('predictions')
-      .select('*')
+      .select('*, home_team:teams!home_team_id(id, short_name, flag_url), away_team:teams!away_team_id(id, short_name, flag_url)')
       .eq('user_id', userId)
       .order('created_at')
     setUserPredictions(data ?? [])
@@ -258,16 +258,19 @@ export default function AdminUsersPage() {
                             {stagePreds.map(pred => {
                               const match = stageMatches.find(m => m.id === pred.match_id)
                               if (!match) return null
+                              // Usar equipos guardados en predicción, si no usar los del partido
+                              const homeTeam = (pred as any).home_team || match.home_team
+                              const awayTeam = (pred as any).away_team || match.away_team
                               return (
                                 <div key={pred.id} className="flex items-center gap-2 px-3 py-2">
                                   <div className="flex items-center gap-1 flex-1 min-w-0">
-                                    {match.home_team?.flag_url && <img src={match.home_team.flag_url} className="w-5 h-3 object-cover rounded flex-shrink-0"/>}
-                                    <span className="text-xs text-gray-700 dark:text-gray-300 truncate">{match.home_team?.short_name}</span>
+                                    {homeTeam?.flag_url && <img src={homeTeam.flag_url} className="w-5 h-3 object-cover rounded flex-shrink-0"/>}
+                                    <span className="text-xs text-gray-700 dark:text-gray-300 truncate">{homeTeam?.short_name || 'TBD'}</span>
                                   </div>
                                   <span className="text-xs font-black text-green-600 dark:text-green-400 flex-shrink-0">{pred.home_score}-{pred.away_score}</span>
                                   <div className="flex items-center gap-1 flex-1 min-w-0 justify-end">
-                                    <span className="text-xs text-gray-700 dark:text-gray-300 truncate">{match.away_team?.short_name}</span>
-                                    {match.away_team?.flag_url && <img src={match.away_team.flag_url} className="w-5 h-3 object-cover rounded flex-shrink-0"/>}
+                                    <span className="text-xs text-gray-700 dark:text-gray-300 truncate">{awayTeam?.short_name || 'TBD'}</span>
+                                    {awayTeam?.flag_url && <img src={awayTeam.flag_url} className="w-5 h-3 object-cover rounded flex-shrink-0"/>}
                                   </div>
                                   {pred.is_calculated && (
                                     <span className={`text-xs font-bold flex-shrink-0 w-8 text-right ${pred.points_earned >= 5 ? 'text-green-500' : pred.points_earned >= 3 ? 'text-blue-500' : 'text-gray-400'}`}>
