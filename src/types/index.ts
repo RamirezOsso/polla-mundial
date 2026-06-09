@@ -68,6 +68,8 @@ export interface Prediction {
   away_score: number
   points_earned: number
   is_calculated: boolean
+  home_team_id?: string | null
+  away_team_id?: string | null
   created_at: string
   updated_at: string
   match?: Match
