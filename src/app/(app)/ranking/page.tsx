@@ -102,7 +102,14 @@ export default function RankingPage() {
                         {r.profile?.display_name || r.profile?.username}
                         {isMe && <span className="ml-1 text-green-600 dark:text-green-400 text-xs">(Tú)</span>}
                       </p>
-                      {r.profile?.country && <p className="text-xs text-gray-400 truncate hidden sm:block">{r.profile.country}</p>}
+                      <div className="flex items-center gap-2 mt-0.5">
+                        {r.total_predictions >= 104
+                          ? <span className="text-xs bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 px-1.5 py-0.5 rounded-full font-bold">✅ 104/104</span>
+                          : r.total_predictions > 0
+                          ? <span className="text-xs bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 px-1.5 py-0.5 rounded-full">{r.total_predictions}/104</span>
+                          : <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-400 px-1.5 py-0.5 rounded-full">Sin pronósticos</span>
+                        }
+                      </div>
                     </div>
                   </div>
                   {/* Puntos - siempre visible */}
