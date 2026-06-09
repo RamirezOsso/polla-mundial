@@ -58,21 +58,19 @@ export default function DashboardPage() {
               <p className="text-xs text-green-100">Tu posición global</p>
               <p className="text-xl font-black text-white">#{userRank?.rank ?? '?'} · {userRank?.total_points ?? 0} pts</p>
             </div>
-            <div className="mt-3 bg-white/20 backdrop-blur-sm rounded-2xl px-4 py-2">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-xs text-green-100">Pronósticos completados</p>
-                <p className="text-xs font-black text-white">{predictions.length}/104 {predictions.length >= 104 ? '✅' : ''}</p>
-              </div>
-              <div className="h-2 bg-white/20 rounded-full overflow-hidden">
-                <div className={`h-full rounded-full transition-all duration-500 ${predictions.length >= 104 ? 'bg-green-300' : 'bg-yellow-300'}`}
-                  style={{ width: `${Math.min(Math.round((predictions.length / 104) * 100), 100)}%` }}/>
-              </div>
-              {predictions.length < 104 && (
-                <p className="text-xs text-green-200 mt-1">Te faltan {104 - predictions.length} partidos</p>
-              )}
+          </div>
+          <div className="mt-3 bg-white/20 backdrop-blur-sm rounded-2xl px-4 py-2">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs text-green-100">Pronósticos completados</p>
+              <p className="text-xs font-black text-white">{predictions.length}/104 {predictions.length >= 104 ? '✅' : ''}</p>
             </div>
-            <div className="hidden">
+            <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+              <div className={`h-full rounded-full transition-all duration-500 ${predictions.length >= 104 ? 'bg-green-300' : 'bg-yellow-300'}`}
+                style={{ width: `${Math.min(Math.round((predictions.length / 104) * 100), 100)}%` }}/>
             </div>
+            {predictions.length < 104 && (
+              <p className="text-xs text-green-200 mt-1">Te faltan {104 - predictions.length} partidos</p>
+            )}
           </div>
         </div>
       </div>
