@@ -14,8 +14,30 @@ export default function AdminUsersPage() {
   const [newPassword, setNewPassword] = useState('')
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState('')
+  const [userPredictions, setUserPredictions] = useState<any[]>([])
+  const [loadingPreds, setLoadingPreds] = useState(false)
+  const [matches, setMatches] = useState<any[]>([])
 
-  useEffect(() => { loadUsers() }, [])
+  useEffect(() => { loadUsers(); loadMatches() }, [])
+
+  const loadMatches = async () => {
+    const { data } = await createClient()
+      .from('matches')
+      .select('*, home_team:teams!home_team_id(name, short_name, flag_url), away_team:teams!away_team_id(name, short_name, flag_url), stage:stages(type, name)')
+      .order('match_number')
+    setMatches(data ?? [])
+  }
+
+  const loadUserPredictions = async (userId: string) => {
+    setLoadingPreds(true)
+    const { data } = await createClient()
+      .from('predictions')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at')
+    setUserPredictions(data ?? [])
+    setLoadingPreds(false)
+  }
 
   const loadUsers = async () => {
     const supabase = createClient()
@@ -48,6 +70,7 @@ export default function AdminUsersPage() {
     setShowModal(true)
     setMsg('')
     setNewPassword('')
+    if (type === 'detail') loadUserPredictions(user.id)
   }
 
   const handleToggleActive = async (user: any) => {
@@ -207,6 +230,59 @@ export default function AdminUsersPage() {
                   }`}>
                   {selected.is_spectator ? '✅ Quitar modo espectador' : '👀 Marcar como espectador'}
                 </button>
+
+                {/* Predicciones del usuario */}
+                <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                  <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 flex items-center justify-between">
+                    <p className="text-xs font-bold text-gray-700 dark:text-gray-300">⚽ Predicciones ({userPredictions.length})</p>
+                  </div>
+                  {loadingPreds ? (
+                    <div className="p-4 text-center text-xs text-gray-400">Cargando...</div>
+                  ) : userPredictions.length === 0 ? (
+                    <div className="p-4 text-center text-xs text-gray-400">Sin predicciones aún</div>
+                  ) : (
+                    <div className="max-h-64 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-800">
+                      {['group','round_of_32','round_of_16','quarter_final','semi_final','third_place','final'].map(stageType => {
+                        const stageMatches = matches.filter(m => m.stage?.type === stageType)
+                        const stagePreds = userPredictions.filter(p => stageMatches.find(m => m.id === p.match_id))
+                        if (stagePreds.length === 0) return null
+                        const stageLabel: Record<string,string> = {
+                          group: 'Grupos', round_of_32: 'R32', round_of_16: 'Octavos',
+                          quarter_final: 'Cuartos', semi_final: 'Semis', third_place: '3er Lugar', final: 'Final'
+                        }
+                        return (
+                          <div key={stageType}>
+                            <div className="px-3 py-1 bg-gray-100 dark:bg-gray-700/50">
+                              <p className="text-xs font-bold text-gray-500 dark:text-gray-400">{stageLabel[stageType]}</p>
+                            </div>
+                            {stagePreds.map(pred => {
+                              const match = stageMatches.find(m => m.id === pred.match_id)
+                              if (!match) return null
+                              return (
+                                <div key={pred.id} className="flex items-center gap-2 px-3 py-2">
+                                  <div className="flex items-center gap-1 flex-1 min-w-0">
+                                    {match.home_team?.flag_url && <img src={match.home_team.flag_url} className="w-5 h-3 object-cover rounded flex-shrink-0"/>}
+                                    <span className="text-xs text-gray-700 dark:text-gray-300 truncate">{match.home_team?.short_name}</span>
+                                  </div>
+                                  <span className="text-xs font-black text-green-600 dark:text-green-400 flex-shrink-0">{pred.home_score}-{pred.away_score}</span>
+                                  <div className="flex items-center gap-1 flex-1 min-w-0 justify-end">
+                                    <span className="text-xs text-gray-700 dark:text-gray-300 truncate">{match.away_team?.short_name}</span>
+                                    {match.away_team?.flag_url && <img src={match.away_team.flag_url} className="w-5 h-3 object-cover rounded flex-shrink-0"/>}
+                                  </div>
+                                  {pred.is_calculated && (
+                                    <span className={`text-xs font-bold flex-shrink-0 w-8 text-right ${pred.points_earned >= 5 ? 'text-green-500' : pred.points_earned >= 3 ? 'text-blue-500' : 'text-gray-400'}`}>
+                                      +{pred.points_earned}
+                                    </span>
+                                  )}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
                 <div className="flex gap-2">
                   <button onClick={() => setModalType('reset')}
                     className="flex-1 py-2 bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 font-bold rounded-xl text-sm">
