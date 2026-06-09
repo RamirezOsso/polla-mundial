@@ -86,9 +86,11 @@ export default function LoginPage() {
                 <div className="relative">
                   <input type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
                     placeholder="••••••••" required
-                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 pr-12 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-green-500" />
+                    autoComplete="current-password"
+                    style={{WebkitTextSecurity: showPassword ? 'none' : undefined} as any}
+                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 pr-12 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-green-500 [&::-webkit-credentials-auto-fill-button]:hidden [&::-webkit-strong-password-auto-fill-button]:hidden" />
                   <button type="button" onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors text-lg">
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors text-xl z-10">
                     {showPassword ? '🙈' : '👁️'}
                   </button>
                 </div>
@@ -120,9 +122,10 @@ export default function LoginPage() {
                 <div className="relative">
                   <input type={showAdminPass ? 'text' : 'password'} value={adminPass} onChange={e => setAdminPass(e.target.value)}
                     placeholder="••••••••" required
-                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 pr-12 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-purple-500" />
+                    autoComplete="current-password"
+                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 pr-12 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-purple-500 [&::-webkit-credentials-auto-fill-button]:hidden [&::-webkit-strong-password-auto-fill-button]:hidden" />
                   <button type="button" onClick={() => setShowAdminPass(!showAdminPass)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors text-lg">
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors text-xl z-10">
                     {showAdminPass ? '🙈' : '👁️'}
                   </button>
                 </div>
