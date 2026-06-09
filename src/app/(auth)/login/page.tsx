@@ -90,8 +90,8 @@ export default function LoginPage() {
                     style={{WebkitTextSecurity: showPassword ? 'none' : undefined} as any}
                     className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 pr-12 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-green-500 [&::-webkit-credentials-auto-fill-button]:hidden [&::-webkit-strong-password-auto-fill-button]:hidden" />
                   <button type="button" onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors text-xl z-10">
-                    {showPassword ? '🙈' : '👁️'}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-green-400 hover:text-green-300 transition-colors z-10 bg-gray-800 px-1">
+                    {showPassword ? 'Ocultar' : 'Ver'}
                   </button>
                 </div>
               </div>
@@ -125,8 +125,8 @@ export default function LoginPage() {
                     autoComplete="current-password"
                     className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 pr-12 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-purple-500 [&::-webkit-credentials-auto-fill-button]:hidden [&::-webkit-strong-password-auto-fill-button]:hidden" />
                   <button type="button" onClick={() => setShowAdminPass(!showAdminPass)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors text-xl z-10">
-                    {showAdminPass ? '🙈' : '👁️'}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-green-400 hover:text-green-300 transition-colors z-10 bg-gray-800 px-1">
+                    {showAdminPass ? 'Ocultar' : 'Ver'}
                   </button>
                 </div>
               </div>
