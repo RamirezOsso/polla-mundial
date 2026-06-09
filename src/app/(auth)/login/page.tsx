@@ -13,6 +13,8 @@ export default function LoginPage() {
   const [tab, setTab] = useState<'user' | 'admin'>('user')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showAdminPass, setShowAdminPass] = useState(false)
   const [adminUser, setAdminUser] = useState('')
   const [adminPass, setAdminPass] = useState('')
   const [loading, setLoading] = useState(false)
@@ -81,7 +83,8 @@ export default function LoginPage() {
               </div>
               <div className="space-y-1">
                 <label className="text-sm font-medium text-gray-300">Contraseña</label>
-                <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+                <div className="relative">
+                <input type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••" required
                   className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-green-500" />
               </div>
@@ -109,7 +112,8 @@ export default function LoginPage() {
               </div>
               <div className="space-y-1">
                 <label className="text-sm font-medium text-gray-300">Contraseña</label>
-                <input type="password" value={adminPass} onChange={e => setAdminPass(e.target.value)}
+                <div className="relative">
+                <input type={showAdminPass ? 'text' : 'password'} value={adminPass} onChange={e => setAdminPass(e.target.value)}
                   placeholder="••••••••" required
                   className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-purple-500" />
               </div>
