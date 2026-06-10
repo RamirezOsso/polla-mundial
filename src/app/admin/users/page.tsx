@@ -62,9 +62,10 @@ export default function AdminUsersPage() {
 
   const predByUser = useMemo(() => {
     const map = new Map<string, number>()
-    allPredictions.forEach(p => map.set(p.user_id, (map.get(p.user_id) ?? 0) + 1))
+    // Usar total_predictions de global_ranking que ya está actualizado en la BD
+    ranking.forEach((r: any) => map.set(r.user_id, r.total_predictions ?? 0))
     return map
-  }, [allPredictions])
+  }, [ranking])
 
   const authMap = useMemo(() => {
     const map = new Map<string, any>()

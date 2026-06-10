@@ -41,8 +41,9 @@ export default function AdminDashboard() {
 
     // Predicciones por usuario
     const predByUser = new Map<string, number>()
-    predictions?.forEach((p: any) => {
-      predByUser.set(p.user_id, (predByUser.get(p.user_id) ?? 0) + 1)
+    // Usar total_predictions de global_ranking que ya está actualizado en la BD
+    ranking?.forEach((r: any) => {
+      predByUser.set(r.user_id, r.total_predictions ?? 0)
     })
 
     // Estado de usuarios
