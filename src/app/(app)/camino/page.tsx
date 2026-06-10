@@ -219,25 +219,6 @@ export default function CaminoPage() {
   const { predictions, savePrediction, isPredictionsOpen } = usePredictions(user?.id)
   const [activeStage, setActiveStage] = useState('r32')
 
-  // Guardar equipos en predicciones existentes cuando se calculan
-  useEffect(() => {
-    if (!user?.id || predictions.length === 0 || matches.length === 0) return
-    const supabase = createClient()
-    const updateTeams = async () => {
-      for (const pred of predictions) {
-        if (pred.home_team_id && pred.away_team_id) continue
-        const match = matches.find(m => m.id === pred.match_id)
-        if (!match) continue
-        if (match.home_team?.short_name === 'TBD' || match.away_team?.short_name === 'TBD') continue
-        await supabase.from('predictions').update({
-          home_team_id: match.home_team_id,
-          away_team_id: match.away_team_id,
-        }).eq('id', pred.id)
-      }
-    }
-    updateTeams()
-  }, [user?.id, predictions.length, matches.length])
-
   const predMap = useMemo(() => new Map(predictions.map(p => [p.match_id, p])), [predictions])
   const groupMatches = useMemo(() => matches.filter(m => m.stage?.type === 'group'), [matches])
 
