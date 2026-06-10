@@ -119,7 +119,7 @@ export default function AdminUsersPage() {
     setLoadingPreds(true)
     const { data } = await createClient()
       .from('predictions')
-      .select('*')
+      .select('*, home_team:teams!home_team_id(id, short_name, name, flag_url), away_team:teams!away_team_id(id, short_name, name, flag_url)')
       .eq('user_id', user.id)
       .order('created_at')
     setUserPredictions(data ?? [])
