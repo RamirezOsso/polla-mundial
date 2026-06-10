@@ -97,10 +97,27 @@ function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
     const init: Record<string, any> = {}
     matches.forEach((m: any) => {
       const p = predMap.get(m.id)
-      init[m.id] = { h: p?.home_score ?? '', a: p?.away_score ?? '' }
+      init[m.id] = { 
+        h: p?.home_score !== undefined && p?.home_score !== null ? p.home_score : '',
+        a: p?.away_score !== undefined && p?.away_score !== null ? p.away_score : ''
+      }
     })
     return init
   })
+
+  useEffect(() => {
+    setScores(() => {
+      const init: Record<string, any> = {}
+      matches.forEach((m: any) => {
+        const p = predMap.get(m.id)
+        init[m.id] = {
+          h: p?.home_score !== undefined && p?.home_score !== null ? p.home_score : '',
+          a: p?.away_score !== undefined && p?.away_score !== null ? p.away_score : ''
+        }
+      })
+      return init
+    })
+  }, [predictions.length])
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 

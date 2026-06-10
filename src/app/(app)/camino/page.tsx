@@ -103,6 +103,11 @@ function MatchCard({ match, homeTeam, awayTeam, prediction, onSave, pts, isLocke
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
+  useEffect(() => {
+    if (prediction?.home_score !== undefined && prediction?.home_score !== null) setHome(prediction.home_score)
+    if (prediction?.away_score !== undefined && prediction?.away_score !== null) setAway(prediction.away_score)
+  }, [prediction?.home_score, prediction?.away_score])
+
   const isPending = !homeTeam || !awayTeam || homeTeam?.short_name === 'TBD' || awayTeam?.short_name === 'TBD'
   const hasPred = prediction != null
   const isFinished = match?.status === 'finished'
