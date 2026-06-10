@@ -98,8 +98,8 @@ function ScoreInput({ value, onChange }: { value: number|string, onChange: (n: n
 }
 
 function MatchCard({ match, homeTeam, awayTeam, prediction, onSave, pts, isLocked, label, pendingMsg }: any) {
-  const [home, setHome] = useState<number|string>(prediction?.home_score ?? '')
-  const [away, setAway] = useState<number|string>(prediction?.away_score ?? '')
+  const [home, setHome] = useState<number|string>(prediction?.home_score !== undefined && prediction?.home_score !== null ? prediction.home_score : '')
+  const [away, setAway] = useState<number|string>(prediction?.away_score !== undefined && prediction?.away_score !== null ? prediction.away_score : '')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
