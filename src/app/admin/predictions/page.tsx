@@ -119,6 +119,7 @@ export default function AdminPredictionsPage() {
         for (const stage of STAGES) {
           const stageMatches = matches.filter(m => m.stage?.type === stage.type)
           const stagePreds = userPreds.filter(p => stageMatches.find(m => m.id === p.match_id))
+          console.log(`Stage: ${stage.type}, stageMatches: ${stageMatches.length}, stagePreds: ${stagePreds.length}`)
           if (stagePreds.length === 0) continue
 
           printStageHeader(stage.label)
