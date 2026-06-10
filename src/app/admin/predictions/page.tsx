@@ -56,7 +56,10 @@ export default function AdminPredictionsPage() {
       let isFirstUser = true
 
       const checkPage = (needed = 10) => {
-        if (y + needed > 275) { doc.addPage(); y = 20 }
+        if (y + needed > 270) { 
+          doc.addPage()
+          y = 15
+        }
       }
 
       // Portada
@@ -88,7 +91,7 @@ export default function AdminPredictionsPage() {
 
         const printMatch = (homeTeam: any, awayTeam: any, pred: any) => {
           if (!pred) return
-          checkPage(7)
+          checkPage(10)
           const homeName = homeTeam?.short_name || homeTeam?.name || 'TBD'
           const awayName = awayTeam?.short_name || awayTeam?.name || 'TBD'
           const score = `${pred.home_score} - ${pred.away_score}`
@@ -119,7 +122,6 @@ export default function AdminPredictionsPage() {
         for (const stage of STAGES) {
           const stageMatches = matches.filter(m => m.stage?.type === stage.type)
           const stagePreds = userPreds.filter(p => stageMatches.find(m => m.id === p.match_id))
-          console.log(`Stage: ${stage.type}, stageMatches: ${stageMatches.length}, stagePreds: ${stagePreds.length}`)
           if (stagePreds.length === 0) continue
 
           printStageHeader(stage.label)
