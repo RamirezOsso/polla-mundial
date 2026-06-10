@@ -96,43 +96,65 @@ export default function AdminPredictionsPage() {
         else { y = 75 }
         isFirstUser = false
 
-        // Header usuario
+        // Header usuario con diseño mejorado
         doc.setFillColor(22, 163, 74)
-        doc.rect(margin - 2, y - 6, pageW - (margin - 2) * 2, 13, 'F')
-        doc.setFontSize(14); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255)
-        doc.text((user.display_name || user.username).toUpperCase(), margin + 2, y + 3)
-        doc.setFontSize(9)
-        doc.text(`${userPreds.length} pronosticos`, pageW - margin - 2, y + 3, { align: 'right' })
-        y += 14
+        doc.rect(0, y - 8, 210, 22, 'F')
+        doc.setFillColor(16, 120, 55)
+        doc.rect(0, y + 10, 210, 4, 'F')
+        
+        // Nombre del usuario
+        doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255)
+        doc.text((user.display_name || user.username).toUpperCase(), margin, y + 4)
+        
+        // Total predicciones y posición
+        const userRank = ranking.find((r: any) => r.user_id === user.id)
+        doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(200, 255, 200)
+        doc.text(`${userPreds.length} pronósticos completados`, margin, y + 11)
+        doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255)
+        doc.text(`${userPreds.length}/104`, pageW - margin - 2, y + 4, { align: 'right' })
+        doc.setFont('helvetica', 'normal'); doc.setTextColor(200, 255, 200)
+        doc.text(`pronósticos`, pageW - margin - 2, y + 11, { align: 'right' })
+        y += 22
 
         const printMatch = (homeTeam: any, awayTeam: any, pred: any) => {
           if (!pred) return
           checkPage(10)
-          const homeName = homeTeam?.short_name || homeTeam?.name || 'TBD'
-          const awayName = awayTeam?.short_name || awayTeam?.name || 'TBD'
+          // Usar nombre completo preferentemente
+          const homeName = homeTeam?.name || homeTeam?.short_name || 'Por definir'
+          const awayName = awayTeam?.name || awayTeam?.short_name || 'Por definir'
           const score = `${pred.home_score} - ${pred.away_score}`
           const fecha = new Date(pred.updated_at || pred.created_at).toLocaleString('es-CO', {
             timeZone: 'America/Bogota', day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit'
           })
-          doc.setFontSize(8.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(40, 40, 40)
-          doc.text(`${homeName} vs ${awayName}`, margin + 6, y)
-          doc.setFont('helvetica', 'bold'); doc.setTextColor(22, 163, 74)
-          doc.text(score, 118, y)
-          doc.setFont('helvetica', 'normal'); doc.setTextColor(130, 130, 130); doc.setFontSize(7.5)
-          doc.text(fecha, 133, y)
-          y += 6
-          doc.setDrawColor(230, 230, 230)
-          doc.line(margin + 5, y - 1, pageW - margin, y - 1)
+          // Fondo alternado para mejor lectura
+          doc.setFillColor(250, 250, 250)
+          doc.rect(margin - 2, y - 4, pageW - (margin - 2) * 2, 7, 'F')
+          
+          doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(30, 30, 30)
+          // Truncar nombres largos
+          const maxLen = 28
+          const hName = homeName.length > maxLen ? homeName.substring(0, maxLen) + '.' : homeName
+          const aName = awayName.length > maxLen ? awayName.substring(0, maxLen) + '.' : awayName
+          doc.text(`${hName}  vs  ${aName}`, margin + 3, y)
+          
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(22, 163, 74)
+          doc.text(score, 148, y, { align: 'center' })
+          
+          doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(150, 150, 150)
+          doc.text(fecha, pageW - margin - 2, y, { align: 'right' })
+          y += 7
+          doc.setDrawColor(220, 220, 220)
+          doc.line(margin - 2, y - 1, pageW - margin + 2, y - 1)
         }
 
         const printStageHeader = (label: string) => {
-          checkPage(12)
-          y += 4
-          doc.setFillColor(245, 245, 245)
-          doc.rect(margin - 2, y - 5, pageW - (margin - 2) * 2, 8, 'F')
-          doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(60, 60, 60)
-          doc.text(label.toUpperCase(), margin + 2, y)
-          y += 6
+          checkPage(15)
+          y += 5
+          doc.setFillColor(30, 30, 30)
+          doc.rect(margin - 2, y - 5, pageW - (margin - 2) * 2, 9, 'F')
+          doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255)
+          doc.text('⚽  ' + label.toUpperCase(), margin + 2, y)
+          y += 7
         }
 
         for (const stage of STAGES) {
