@@ -1,175 +1,329 @@
-import { createClient } from '@/lib/supabase/server'
+'use client'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 
-export default async function AdminPage() {
-  const supabase = await createClient()
+const PRECIO_POR_JUGADOR = 100000
 
-  const [
-    { count: totalUsers },
-    { count: activeUsers },
-    { count: inactiveUsers },
-    { count: totalMatches },
-    { count: finishedMatches },
-    { count: totalPredictions },
-    { count: pendingResults },
-    { data: topUser },
-    { data: topExact },
-    { data: recentActivity },
-  ] = await Promise.all([
-    supabase.from('profiles').select('*', { count: 'exact', head: true }),
-    supabase.from('profiles').select('*', { count: 'exact', head: true }).neq('is_active', false),
-    supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('is_active', false),
-    supabase.from('matches').select('*', { count: 'exact', head: true }),
-    supabase.from('matches').select('*', { count: 'exact', head: true }).eq('status', 'finished'),
-    supabase.from('predictions').select('*', { count: 'exact', head: true }),
-    supabase.from('matches').select('*', { count: 'exact', head: true }).eq('status', 'scheduled').not('result_published_at', 'is', null),
-    supabase.from('global_ranking').select('*, profile:profiles(username, display_name, avatar_url)').order('total_points', { ascending: false }).limit(1),
-    supabase.from('global_ranking').select('*, profile:profiles(username, display_name)').order('exact_scores', { ascending: false }).limit(1),
-    supabase.from('predictions').select('*, profile:profiles(username), match:matches(*, home_team:teams!home_team_id(name, flag_url), away_team:teams!away_team_id(name, flag_url))').order('created_at', { ascending: false }).limit(8),
-  ])
+export default function AdminDashboard() {
+  const [data, setData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
-  const leader = topUser?.[0]
-  const exactLeader = topExact?.[0]
+  useEffect(() => { loadData() }, [])
 
-  const kpis = [
-    { label: 'Usuarios', value: totalUsers ?? 0, icon: '👥', color: 'from-blue-500 to-blue-600', sub: `${activeUsers ?? 0} activos` },
-    { label: 'Inactivos', value: inactiveUsers ?? 0, icon: '🚫', color: 'from-red-500 to-red-600', sub: 'bloqueados' },
-    { label: 'Predicciones', value: totalPredictions ?? 0, icon: '🎯', color: 'from-purple-500 to-purple-600', sub: 'realizadas' },
-    { label: 'Partidos', value: totalMatches ?? 0, icon: '⚽', color: 'from-green-500 to-green-600', sub: `${finishedMatches ?? 0} finalizados` },
+  const loadData = async () => {
+    const supabase = createClient()
+    const [
+      { data: profiles },
+      { data: matches },
+      { data: predictions },
+      { data: ranking },
+      { data: config },
+    ] = await Promise.all([
+      supabase.from('profiles').select('id, display_name, username, is_active, is_spectator, is_admin, created_at'),
+      supabase.from('matches').select('*, stage:stages(type), home_team:teams!home_team_id(name, short_name), away_team:teams!away_team_id(name, short_name)').order('match_number'),
+      supabase.from('predictions').select('user_id, match_id, home_score, away_score, created_at, updated_at'),
+      supabase.from('global_ranking').select('*, profile:profiles(display_name, username)').order('rank'),
+      supabase.from('tournament_config').select('*').single(),
+    ])
+    setData({ profiles, matches, predictions, ranking, config })
+    setLoading(false)
+  }
+
+  const stats = useMemo(() => {
+    if (!data) return null
+    const { profiles, matches, predictions, ranking } = data
+
+    const pagantes = profiles?.filter((p: any) => !p.is_spectator && p.is_active !== false && !p.is_admin) ?? []
+    const espectadores = profiles?.filter((p: any) => p.is_spectator) ?? []
+    const inactivos = profiles?.filter((p: any) => p.is_active === false) ?? []
+    const pozo = pagantes.length * PRECIO_POR_JUGADOR
+
+    // Predicciones por usuario
+    const predByUser = new Map<string, number>()
+    predictions?.forEach((p: any) => {
+      predByUser.set(p.user_id, (predByUser.get(p.user_id) ?? 0) + 1)
+    })
+
+    // Estado de usuarios
+    const usuariosCompletos = pagantes.filter((p: any) => (predByUser.get(p.id) ?? 0) >= 104)
+    const usuariosIncompletos = pagantes.filter((p: any) => {
+      const c = predByUser.get(p.id) ?? 0
+      return c > 0 && c < 104
+    })
+    const usuariosSinPreds = pagantes.filter((p: any) => (predByUser.get(p.id) ?? 0) === 0)
+
+    // Partidos
+    const finishedMatches = matches?.filter((m: any) => m.status === 'finished') ?? []
+    const scheduledMatches = matches?.filter((m: any) => m.status === 'scheduled') ?? []
+    const groupMatches = matches?.filter((m: any) => m.stage?.type === 'group') ?? []
+    const finishedGroups = groupMatches.filter((m: any) => m.status === 'finished')
+
+    // Alertas
+    const alertas = []
+    if (usuariosSinPreds.length > 0)
+      alertas.push({ type: 'error', msg: `${usuariosSinPreds.length} usuario(s) sin ningún pronóstico`, link: '/admin/users' })
+    if (usuariosIncompletos.length > 0)
+      alertas.push({ type: 'warning', msg: `${usuariosIncompletos.length} usuario(s) con pronósticos incompletos`, link: '/admin/users' })
+    if (!data.config?.is_predictions_open)
+      alertas.push({ type: 'info', msg: 'Las predicciones están cerradas', link: '/admin/config' })
+    if (finishedGroups.length === 72 && finishedMatches.filter((m: any) => m.stage?.type === 'round_of_32').length === 0)
+      alertas.push({ type: 'warning', msg: 'Grupos completos — verifica que R32 se generó correctamente', link: '/admin/results' })
+
+    // Fase actual
+    const stageOrder = ['group', 'round_of_32', 'round_of_16', 'quarter_final', 'semi_final', 'third_place', 'final']
+    const stageLabels: Record<string, string> = {
+      group: 'Fase de Grupos', round_of_32: 'Ronda de 32', round_of_16: 'Octavos',
+      quarter_final: 'Cuartos', semi_final: 'Semifinales', third_place: 'Tercer Lugar', final: 'Final'
+    }
+    const currentStage = stageOrder.find(s => {
+      const sm = matches?.filter((m: any) => m.stage?.type === s) ?? []
+      return sm.some((m: any) => m.status === 'scheduled')
+    }) ?? 'final'
+
+    // Próximos partidos sin resultado
+    const pendingResults = finishedMatches.filter((m: any) => !m.result_published_at).slice(0, 5)
+
+    // Hoy
+    const today = new Date().toLocaleDateString('es-CO', { timeZone: 'America/Bogota' })
+    const todayMatches = scheduledMatches.filter((m: any) =>
+      new Date(m.match_date).toLocaleDateString('es-CO', { timeZone: 'America/Bogota' }) === today
+    )
+
+    // Equipo más predicho como campeón
+    const finalMatchId = matches?.find((m: any) => m.stage?.type === 'final')?.id
+    const finalPreds = predictions?.filter((p: any) => p.match_id === finalMatchId) ?? []
+
+    return {
+      pagantes, espectadores, inactivos, pozo,
+      predByUser, usuariosCompletos, usuariosIncompletos, usuariosSinPreds,
+      finishedMatches, scheduledMatches, groupMatches, finishedGroups,
+      alertas, currentStage, stageLabels, todayMatches, pendingResults,
+      ranking: ranking ?? [],
+      totalMatches: matches?.length ?? 0,
+      tasa: pagantes.length > 0 ? Math.round((usuariosCompletos.length / pagantes.length) * 100) : 0,
+    }
+  }, [data])
+
+  if (loading || !stats) return (
+    <div className="space-y-4">
+      {Array.from({length: 4}).map((_, i) => (
+        <div key={i} className="h-24 bg-gray-200 dark:bg-gray-800 animate-pulse rounded-2xl"/>
+      ))}
+    </div>
+  )
+
+  const { pozo } = stats
+  const prizes = [
+    { pos: '🥇 1er Puesto', pct: 60, color: 'text-yellow-500', bg: 'bg-yellow-50 dark:bg-yellow-500/10' },
+    { pos: '🥈 2do Puesto', pct: 25, color: 'text-gray-400', bg: 'bg-gray-50 dark:bg-gray-800' },
+    { pos: '🥉 3er Puesto', pct: 15, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-500/10' },
   ]
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-black text-gray-900 dark:text-white">📊 Dashboard</h1>
-        <p className="text-gray-500 text-sm mt-1">Panel de administración — FIFA World Cup 2026</p>
-      </div>
-
-      {/* KPIs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {kpis.map(k => (
-          <div key={k.label} className={`bg-gradient-to-br ${k.color} rounded-2xl p-5 text-white shadow-lg`}>
-            <div className="text-3xl mb-2">{k.icon}</div>
-            <div className="text-3xl font-black">{k.value.toLocaleString()}</div>
-            <div className="text-sm opacity-80 mt-1">{k.label}</div>
-            <div className="text-xs opacity-60 mt-0.5">{k.sub}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Líderes */}
-      <div className="grid sm:grid-cols-2 gap-4">
-        {/* Líder actual */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
-          <h3 className="text-sm font-bold text-gray-500 mb-3">🥇 Líder del ranking</h3>
-          {leader ? (
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-2xl flex-shrink-0">
-                {leader.profile?.avatar_url
-                  ? <img src={leader.profile.avatar_url} className="w-full h-full rounded-full object-cover"/>
-                  : '👤'}
-              </div>
-              <div>
-                <p className="font-black text-gray-900 dark:text-white">{leader.profile?.display_name || leader.profile?.username}</p>
-                <p className="text-2xl font-black text-yellow-500">{leader.total_points} pts</p>
-              </div>
-            </div>
-          ) : <p className="text-gray-400 text-sm">Sin datos aún</p>}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-black text-gray-900 dark:text-white">📊 Dashboard</h1>
+          <p className="text-gray-500 text-sm mt-1">FIFA World Cup 2026 · {stats.stageLabels[stats.currentStage]}</p>
         </div>
-
-        {/* Más exactos */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
-          <h3 className="text-sm font-bold text-gray-500 mb-3">🎯 Más marcadores exactos</h3>
-          {exactLeader ? (
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-2xl flex-shrink-0">
-                🎯
-              </div>
-              <div>
-                <p className="font-black text-gray-900 dark:text-white">{exactLeader.profile?.display_name || exactLeader.profile?.username}</p>
-                <p className="text-2xl font-black text-green-500">{exactLeader.exact_scores} exactos</p>
-              </div>
-            </div>
-          ) : <p className="text-gray-400 text-sm">Sin datos aún</p>}
-        </div>
+        <button onClick={loadData} className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 border border-gray-200 dark:border-gray-700 px-3 py-1.5 rounded-xl transition-all">
+          🔄 Actualizar
+        </button>
       </div>
 
-      {/* Progreso del torneo */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
-        <h3 className="text-sm font-bold text-gray-500 mb-3">⚽ Progreso del torneo</h3>
-        <div className="space-y-3">
-          {[
-            { label: 'Partidos jugados', done: finishedMatches ?? 0, total: totalMatches ?? 0, color: 'bg-green-500' },
-            { label: 'Predicciones realizadas', done: totalPredictions ?? 0, total: (totalUsers ?? 0) * (totalMatches ?? 0), color: 'bg-blue-500' },
-          ].map(p => (
-            <div key={p.label}>
-              <div className="flex items-center justify-between text-sm mb-1">
-                <span className="text-gray-600 dark:text-gray-400">{p.label}</span>
-                <span className="font-bold text-gray-900 dark:text-white">{p.done}/{p.total}</span>
-              </div>
-              <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                <div className={`h-full ${p.color} rounded-full transition-all`}
-                  style={{ width: `${p.total > 0 ? Math.min((p.done / p.total) * 100, 100) : 0}%` }}/>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Accesos rápidos */}
-      <div>
-        <h3 className="text-sm font-bold text-gray-500 mb-3">⚡ Accesos rápidos</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { href: '/admin/results', label: 'Ingresar resultados', icon: '📋', desc: `${(totalMatches ?? 0) - (finishedMatches ?? 0)} pendientes` },
-            { href: '/admin/users', label: 'Gestionar usuarios', icon: '👥', desc: `${totalUsers ?? 0} registrados` },
-            { href: '/admin/matches', label: 'Gestionar partidos', icon: '⚽', desc: `${totalMatches ?? 0} partidos` },
-            { href: '/admin/config', label: 'Configuración', icon: '🔧', desc: 'Ajustes del torneo' },
-          ].map(a => (
-            <Link key={a.href} href={a.href}
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-green-400 dark:hover:border-green-500/50 rounded-2xl p-4 transition-all group">
-              <div className="text-2xl mb-2">{a.icon}</div>
-              <p className="font-bold text-gray-900 dark:text-white text-sm group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">{a.label}</p>
-              <p className="text-xs text-gray-400 mt-0.5">{a.desc}</p>
+      {/* Alertas */}
+      {stats.alertas.length > 0 && (
+        <div className="space-y-2">
+          {stats.alertas.map((a: any, i: number) => (
+            <Link key={i} href={a.link}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium transition-all hover:opacity-80 ${
+                a.type === 'error' ? 'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400' :
+                a.type === 'warning' ? 'bg-yellow-50 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/30 text-yellow-600 dark:text-yellow-400' :
+                'bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/30 text-blue-600 dark:text-blue-400'
+              }`}>
+              <span>{a.type === 'error' ? '🔴' : a.type === 'warning' ? '🟡' : 'ℹ️'}</span>
+              <span className="flex-1">{a.msg}</span>
+              <span>→</span>
             </Link>
           ))}
         </div>
+      )}
+
+      {/* Pozo y premios */}
+      <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-2xl p-5 text-white">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="text-green-100 text-sm">💰 Pozo total</p>
+            <p className="text-3xl font-black">${pozo.toLocaleString('es-CO')}</p>
+            <p className="text-green-200 text-xs mt-1">{stats.pagantes.length} jugadores × $100.000</p>
+          </div>
+          <div className="text-right">
+            <p className="text-green-100 text-xs">Fase actual</p>
+            <p className="text-lg font-black">{stats.stageLabels[stats.currentStage]}</p>
+            <p className="text-green-200 text-xs">{stats.finishedMatches.length}/{stats.totalMatches} partidos</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          {prizes.map((p, i) => {
+            const winner = stats.ranking[i]
+            const amount = Math.round(pozo * p.pct / 100)
+            return (
+              <div key={p.pos} className="bg-white/20 rounded-xl p-3 text-center">
+                <p className="text-xs text-green-100 mb-1">{p.pos}</p>
+                <p className="text-lg font-black">${amount.toLocaleString('es-CO')}</p>
+                <p className="text-xs text-green-200">{p.pct}%</p>
+                {winner && <p className="text-xs font-bold mt-1 truncate">{winner.profile?.display_name || winner.profile?.username}</p>}
+              </div>
+            )
+          })}
+        </div>
       </div>
 
-      {/* Actividad reciente */}
-      {recentActivity && recentActivity.length > 0 && (
+      {/* Estado usuarios */}
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
+        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+          <h2 className="text-sm font-black text-gray-900 dark:text-white">👥 Estado de participantes</h2>
+          <div className="flex items-center gap-2">
+            <span className="text-xs bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 px-2 py-0.5 rounded-full font-bold">{stats.usuariosCompletos.length} completos</span>
+            <span className="text-xs bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 px-2 py-0.5 rounded-full">{stats.usuariosIncompletos.length} incompletos</span>
+            <span className="text-xs bg-red-100 dark:bg-red-500/20 text-red-500 px-2 py-0.5 rounded-full">{stats.usuariosSinPreds.length} sin preds</span>
+          </div>
+        </div>
+
+        {/* Barra progreso */}
+        <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs text-gray-500">Tasa de participación completa</span>
+            <span className="text-xs font-black text-gray-900 dark:text-white">{stats.tasa}%</span>
+          </div>
+          <div className="h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden flex">
+            <div className="h-full bg-green-500 transition-all" style={{ width: `${(stats.usuariosCompletos.length / Math.max(stats.pagantes.length, 1)) * 100}%` }}/>
+            <div className="h-full bg-yellow-400 transition-all" style={{ width: `${(stats.usuariosIncompletos.length / Math.max(stats.pagantes.length, 1)) * 100}%` }}/>
+            <div className="h-full bg-red-400 transition-all" style={{ width: `${(stats.usuariosSinPreds.length / Math.max(stats.pagantes.length, 1)) * 100}%` }}/>
+          </div>
+        </div>
+
+        {/* Lista de usuarios */}
+        <div className="divide-y divide-gray-100 dark:divide-gray-800 max-h-80 overflow-y-auto">
+          {stats.pagantes.map((user: any) => {
+            const preds = stats.predByUser.get(user.id) ?? 0
+            const rank = stats.ranking.find((r: any) => r.user_id === user.id)
+            const pct = Math.round((preds / 104) * 100)
+            const status = preds >= 104 ? 'complete' : preds > 0 ? 'partial' : 'none'
+            return (
+              <div key={user.id} className="flex items-center gap-3 px-4 py-2.5">
+                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                  status === 'complete' ? 'bg-green-500' :
+                  status === 'partial' ? 'bg-yellow-400' : 'bg-red-400'
+                }`}/>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.display_name || user.username}</span>
+                    {status === 'complete' && <span className="text-xs text-green-500">✅</span>}
+                    {status === 'none' && <span className="text-xs text-red-400">❌ Sin pronósticos</span>}
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <div className="flex-1 h-1 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full ${status === 'complete' ? 'bg-green-500' : status === 'partial' ? 'bg-yellow-400' : 'bg-gray-300'}`}
+                        style={{ width: `${pct}%` }}/>
+                    </div>
+                    <span className="text-xs text-gray-400 flex-shrink-0">{preds}/104</span>
+                  </div>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className="text-sm font-black text-gray-900 dark:text-white">{rank?.total_points ?? 0} pts</p>
+                  <p className="text-xs text-gray-400">#{rank?.rank ?? '?'}</p>
+                </div>
+              </div>
+            )
+          })}
+          {stats.espectadores.length > 0 && (
+            <div className="px-4 py-2 bg-orange-50 dark:bg-orange-500/5">
+              <p className="text-xs text-orange-500 font-medium">👀 Espectadores: {stats.espectadores.map((e: any) => e.display_name || e.username).join(', ')}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Ranking top 5 */}
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
+        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+          <h2 className="text-sm font-black text-gray-900 dark:text-white">🏆 Ranking actual</h2>
+          <Link href="/admin/users" className="text-xs text-green-600 dark:text-green-400 font-medium">Ver todos →</Link>
+        </div>
+        <div className="divide-y divide-gray-100 dark:divide-gray-800">
+          {stats.ranking.filter((r: any) => !r.profile?.is_spectator).slice(0, 5).map((r: any, i: number) => {
+            const prize = i < 3 ? prizes[i] : null
+            const prizeAmount = prize ? Math.round(pozo * prize.pct / 100) : 0
+            return (
+              <div key={r.user_id} className="flex items-center gap-3 px-4 py-3">
+                <span className="text-lg w-8 text-center flex-shrink-0">
+                  {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{r.profile?.display_name || r.profile?.username}</p>
+                  <p className="text-xs text-gray-400">{r.exact_scores} exactos · {r.correct_results} correctos · {r.total_predictions} pred.</p>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className="text-base font-black text-gray-900 dark:text-white">{r.total_points} pts</p>
+                  {prize && <p className="text-xs font-bold text-green-600 dark:text-green-400">${prizeAmount.toLocaleString('es-CO')}</p>}
+                </div>
+              </div>
+            )
+          })}
+          {stats.ranking.length === 0 && (
+            <div className="px-4 py-8 text-center text-gray-400 text-sm">Sin datos de ranking aún</div>
+          )}
+        </div>
+      </div>
+
+      {/* Partidos de hoy */}
+      {stats.todayMatches.length > 0 && (
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
-          <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800">
-            <h3 className="text-sm font-bold text-gray-500">🕐 Últimas predicciones</h3>
+          <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <h2 className="text-sm font-black text-gray-900 dark:text-white">📅 Partidos de hoy</h2>
+            <Link href="/admin/results" className="text-xs text-green-600 dark:text-green-400 font-medium">Ingresar resultados →</Link>
           </div>
           <div className="divide-y divide-gray-100 dark:divide-gray-800">
-            {recentActivity.map((p: any) => (
-              <div key={p.id} className="flex items-center gap-3 px-5 py-3">
-                <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-500/20 flex items-center justify-center text-sm flex-shrink-0">
-                  🎯
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-900 dark:text-white">
-                    <span className="font-bold">@{p.profile?.username}</span>
-                    {' predijo '}
-                    <span className="font-medium">{p.match?.home_team?.name} {p.home_score}-{p.away_score} {p.match?.away_team?.name}</span>
+            {stats.todayMatches.map((m: any) => (
+              <div key={m.id} className="flex items-center gap-3 px-4 py-3">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    {m.home_team?.name} vs {m.away_team?.name}
                   </p>
                   <p className="text-xs text-gray-400">
-                    {new Date(p.created_at).toLocaleString('es-CO', { timeZone: 'America/Bogota', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                    {new Date(m.match_date).toLocaleString('es-CO', { timeZone: 'America/Bogota', hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
-                {p.is_calculated && (
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
-                    p.points_earned === 5 ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400' :
-                    p.points_earned >= 3 ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400' :
-                    'bg-gray-100 dark:bg-gray-700 text-gray-500'
-                  }`}>+{p.points_earned}pts</span>
-                )}
+                <span className={`text-xs px-2 py-1 rounded-full font-bold ${
+                  m.status === 'finished' ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400' :
+                  'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400'
+                }`}>
+                  {m.status === 'finished' ? `✅ ${m.home_score}-${m.away_score}` : '⏳ Pendiente'}
+                </span>
               </div>
             ))}
           </div>
         </div>
       )}
+
+      {/* Accesos rápidos */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { href: '/admin/results', label: 'Resultados', icon: '📋', desc: `${stats.finishedMatches.length}/${stats.totalMatches} publicados` },
+          { href: '/admin/users', label: 'Usuarios', icon: '👥', desc: `${stats.pagantes.length} jugadores` },
+          { href: '/admin/predictions', label: 'Backup PDF', icon: '📄', desc: 'Descargar pronósticos' },
+          { href: '/admin/config', label: 'Configuración', icon: '🔧', desc: data?.config?.is_predictions_open ? '🟢 Polla abierta' : '🔴 Polla cerrada' },
+        ].map(a => (
+          <Link key={a.href} href={a.href}
+            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-green-400 dark:hover:border-green-500/50 rounded-2xl p-4 transition-all group">
+            <div className="text-2xl mb-2">{a.icon}</div>
+            <p className="font-bold text-gray-900 dark:text-white text-sm group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">{a.label}</p>
+            <p className="text-xs text-gray-400 mt-0.5">{a.desc}</p>
+          </Link>
+        ))}
+      </div>
     </div>
   )
 }
