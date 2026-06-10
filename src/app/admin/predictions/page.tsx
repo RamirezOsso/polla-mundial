@@ -237,6 +237,19 @@ export default function AdminPredictionsPage() {
           y += 6
         }
 
+        // Función para obtener equipo desde predicción o cálculo
+        const getTeam = (pred: any, side: 'home' | 'away', calcTeam: any) => {
+          const teamId = side === 'home' ? pred?.home_team_id : pred?.away_team_id
+          if (teamId) {
+            // Buscar en todos los matches el equipo guardado
+            for (const m of matches) {
+              if (m.home_team_id === teamId && m.home_team?.short_name !== 'TBD') return m.home_team
+              if (m.away_team_id === teamId && m.away_team?.short_name !== 'TBD') return m.away_team
+            }
+          }
+          return calcTeam
+        }
+
         // GRUPOS
         printStageHeader('Fase de Grupos')
         const groupMatches = matches.filter(m => m.stage?.type === 'group')
@@ -257,28 +270,28 @@ export default function AdminPredictionsPage() {
         printStageHeader('Ronda de 32')
         resolved.r32WithTeams.forEach(({ match, homeTeam, awayTeam }) => {
           const pred = resolved.predMap.get(match?.id)
-          if (pred) printMatch(homeTeam, awayTeam, pred)
+          if (pred) printMatch(getTeam(pred,'home',homeTeam), getTeam(pred,'away',awayTeam), pred)
         })
 
         // OCTAVOS
         printStageHeader('Octavos de Final')
         resolved.r16WithTeams.forEach(({ match, homeTeam, awayTeam }) => {
           const pred = resolved.predMap.get(match?.id)
-          if (pred) printMatch(homeTeam, awayTeam, pred)
+          if (pred) printMatch(getTeam(pred,'home',homeTeam), getTeam(pred,'away',awayTeam), pred)
         })
 
         // CUARTOS
         printStageHeader('Cuartos de Final')
         resolved.qfWithTeams.forEach(({ match, homeTeam, awayTeam }) => {
           const pred = resolved.predMap.get(match?.id)
-          if (pred) printMatch(homeTeam, awayTeam, pred)
+          if (pred) printMatch(getTeam(pred,'home',homeTeam), getTeam(pred,'away',awayTeam), pred)
         })
 
         // SEMIS
         printStageHeader('Semifinales')
         resolved.sfWithTeams.forEach(({ match, homeTeam, awayTeam }) => {
           const pred = resolved.predMap.get(match?.id)
-          if (pred) printMatch(homeTeam, awayTeam, pred)
+          if (pred) printMatch(getTeam(pred,'home',homeTeam), getTeam(pred,'away',awayTeam), pred)
         })
 
         // TERCER LUGAR
@@ -286,7 +299,7 @@ export default function AdminPredictionsPage() {
           const pred = resolved.predMap.get(resolved.tpMatch.id)
           if (pred) {
             printStageHeader('Tercer Lugar')
-            printMatch(resolved.tpHome, resolved.tpAway, pred)
+            printMatch(getTeam(pred,'home',resolved.tpHome), getTeam(pred,'away',resolved.tpAway), pred)
           }
         }
 
@@ -295,7 +308,7 @@ export default function AdminPredictionsPage() {
           const pred = resolved.predMap.get(resolved.finalMatch.id)
           if (pred) {
             printStageHeader('Final')
-            printMatch(resolved.finalHome, resolved.finalAway, pred)
+            printMatch(getTeam(pred,'home',resolved.finalHome), getTeam(pred,'away',resolved.finalAway), pred)
           }
         }
       }
