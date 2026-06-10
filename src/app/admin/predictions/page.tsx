@@ -27,16 +27,32 @@ export default function AdminPredictionsPage() {
 
   const loadData = async () => {
     const supabase = createClient()
-    const [{ data: profiles }, { data: matchData }, { data: predData }, { data: teamData }, { data: rankData }] = await Promise.all([
+    const [{ data: profiles }, { data: matchData }, { data: teamData }, { data: rankData }] = await Promise.all([
       supabase.from('profiles').select('id, username, display_name, is_spectator').order('display_name'),
       supabase.from('matches').select('*, home_team:teams!home_team_id(*), away_team:teams!away_team_id(*), stage:stages(type, name)').order('match_number'),
-      supabase.from('predictions').select('*, pred_home_team:teams!home_team_id(id, short_name, name, flag_url), pred_away_team:teams!away_team_id(id, short_name, name, flag_url)').order('created_at').limit(5000),
       supabase.from('teams').select('*'),
       supabase.from('global_ranking').select('user_id, total_predictions').order('rank'),
     ])
+
+    // Cargar todas las predicciones con paginación
+    let allPreds: any[] = []
+    let page = 0
+    const pageSize = 1000
+    while (true) {
+      const { data: predData } = await supabase
+        .from('predictions')
+        .select('*, pred_home_team:teams!home_team_id(id, short_name, name, flag_url), pred_away_team:teams!away_team_id(id, short_name, name, flag_url)')
+        .order('created_at')
+        .range(page * pageSize, (page + 1) * pageSize - 1)
+      if (!predData || predData.length === 0) break
+      allPreds = [...allPreds, ...predData]
+      if (predData.length < pageSize) break
+      page++
+    }
+
     setUsers(profiles ?? [])
     setMatches(matchData ?? [])
-    setAllPredictions(predData ?? [])
+    setAllPredictions(allPreds)
     setAllTeams(teamData ?? [])
     setRanking(rankData ?? [])
     setLoading(false)
