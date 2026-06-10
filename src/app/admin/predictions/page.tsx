@@ -78,22 +78,14 @@ export default function AdminPredictionsPage() {
         }
       }
 
-      // Portada
-      doc.setFillColor(22, 163, 74)
-      doc.rect(0, 0, 210, 60, 'F')
-      doc.setFontSize(22); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255)
-      doc.text('POLLA MUNDIAL 2026', pageW / 2, 28, { align: 'center' })
-      doc.setFontSize(12); doc.setFont('helvetica', 'normal')
-      doc.text('Backup de Pronosticos', pageW / 2, 40, { align: 'center' })
-      doc.text(`Generado: ${new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })}`, pageW / 2, 50, { align: 'center' })
-      doc.setFontSize(10); doc.setTextColor(200, 255, 200)
-      doc.text(`${usersToExport.length} participantes | ${allPredictions.length} pronosticos`, pageW / 2, 57, { align: 'center' })
+      // Solo fecha de generación en el pie de cada página (sin portada)
+      const fechaGenerado = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })
 
       for (const user of usersToExport) {
         const userPreds = allPredictions.filter(p => p.user_id === user.id)
         if (userPreds.length === 0) continue
         if (!isFirstUser) { doc.addPage(); y = 20 }
-        else { y = 75 }
+        else { y = 20 }
         isFirstUser = false
 
         // Header usuario con diseño mejorado
@@ -126,23 +118,26 @@ export default function AdminPredictionsPage() {
           const fecha = new Date(pred.updated_at || pred.created_at).toLocaleString('es-CO', {
             timeZone: 'America/Bogota', day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit'
           })
+          const rowH = 8
           // Fondo alternado para mejor lectura
-          doc.setFillColor(250, 250, 250)
-          doc.rect(margin - 2, y - 4, pageW - (margin - 2) * 2, 7, 'F')
+          doc.setFillColor(248, 248, 248)
+          doc.rect(margin - 2, y - 5, pageW - (margin - 2) * 2, rowH, 'F')
           
-          doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(30, 30, 30)
-          // Truncar nombres largos
-          const maxLen = 28
+          // Nombres completos truncados
+          const maxLen = 30
           const hName = homeName.length > maxLen ? homeName.substring(0, maxLen) + '.' : homeName
           const aName = awayName.length > maxLen ? awayName.substring(0, maxLen) + '.' : awayName
-          doc.text(`${hName}  vs  ${aName}`, margin + 3, y)
+          
+          doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(30, 30, 30)
+          doc.text(`${hName} vs ${aName}`, margin + 3, y - 0.5)
           
           doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(22, 163, 74)
-          doc.text(score, 148, y, { align: 'center' })
+          doc.text(score, 155, y - 0.5)
           
           doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(150, 150, 150)
-          doc.text(fecha, pageW - margin - 2, y, { align: 'right' })
-          y += 7
+          doc.text(fecha, pageW - margin - 2, y - 0.5, { align: 'right' })
+          
+          y += rowH
           doc.setDrawColor(220, 220, 220)
           doc.line(margin - 2, y - 1, pageW - margin + 2, y - 1)
         }
@@ -153,7 +148,7 @@ export default function AdminPredictionsPage() {
           doc.setFillColor(30, 30, 30)
           doc.rect(margin - 2, y - 5, pageW - (margin - 2) * 2, 9, 'F')
           doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255)
-          doc.text('⚽  ' + label.toUpperCase(), margin + 2, y)
+          doc.text(label.toUpperCase(), margin + 2, y)
           y += 7
         }
 
@@ -170,8 +165,8 @@ export default function AdminPredictionsPage() {
               const gPreds = stagePreds.filter(p => gm.find(m => m.id === p.match_id))
               if (gPreds.length === 0) return
               checkPage(8); y += 2
-              doc.setFontSize(8.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(22, 163, 74)
-              doc.text(`Grupo ${group}`, margin + 3, y); y += 5
+              doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(22, 163, 74)
+              doc.text(`GRUPO ${group}`, margin + 3, y); y += 6
               gm.forEach(match => {
                 const pred = stagePreds.find(p => p.match_id === match.id)
                 if (pred) printMatch(match.home_team, match.away_team, pred)
