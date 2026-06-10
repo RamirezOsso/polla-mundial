@@ -29,7 +29,7 @@ export default function AdminPredictionsPage() {
     const [{ data: profiles }, { data: matchData }, { data: predData }, { data: teamData }] = await Promise.all([
       supabase.from('profiles').select('id, username, display_name, is_spectator').order('display_name'),
       supabase.from('matches').select('*, home_team:teams!home_team_id(*), away_team:teams!away_team_id(*), stage:stages(type, name)').order('match_number'),
-      supabase.from('predictions').select('*, pred_home_team:teams!home_team_id(id, short_name, name, flag_url), pred_away_team:teams!away_team_id(id, short_name, name, flag_url)').order('created_at'),
+      supabase.from('predictions').select('*, pred_home_team:teams!home_team_id(id, short_name, name, flag_url), pred_away_team:teams!away_team_id(id, short_name, name, flag_url)').order('created_at').limit(5000),
       supabase.from('teams').select('*'),
     ])
     setUsers(profiles ?? [])

@@ -49,7 +49,7 @@ export default function AdminUsersPage() {
       supabase.from('profiles').select('*').order('created_at', { ascending: false }),
       supabase.rpc('get_users_info'),
       supabase.from('matches').select('*, home_team:teams!home_team_id(*), away_team:teams!away_team_id(*), stage:stages(type, name)').order('match_number'),
-      supabase.from('predictions').select('*').order('created_at'),
+      supabase.from('predictions').select('*').order('created_at').limit(5000),
       supabase.from('global_ranking').select('*').order('rank'),
     ])
     setUsers(profiles ?? [])

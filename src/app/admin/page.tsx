@@ -22,7 +22,7 @@ export default function AdminDashboard() {
     ] = await Promise.all([
       supabase.from('profiles').select('id, display_name, username, is_active, is_spectator, is_admin, created_at'),
       supabase.from('matches').select('*, stage:stages(type), home_team:teams!home_team_id(name, short_name), away_team:teams!away_team_id(name, short_name)').order('match_number'),
-      supabase.from('predictions').select('user_id, match_id, home_score, away_score, created_at, updated_at'),
+      supabase.from('predictions').select('user_id, match_id, home_score, away_score, created_at, updated_at').limit(5000),
       supabase.from('global_ranking').select('*, profile:profiles(display_name, username)').order('rank'),
       supabase.from('tournament_config').select('*').single(),
     ])
