@@ -19,6 +19,7 @@ export default function AdminPredictionsPage() {
   const [matches, setMatches] = useState<any[]>([])
   const [allPredictions, setAllPredictions] = useState<any[]>([])
   const [allTeams, setAllTeams] = useState<any[]>([])
+  const [ranking, setRanking] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState<string | null>(null)
 
@@ -26,16 +27,18 @@ export default function AdminPredictionsPage() {
 
   const loadData = async () => {
     const supabase = createClient()
-    const [{ data: profiles }, { data: matchData }, { data: predData }, { data: teamData }] = await Promise.all([
+    const [{ data: profiles }, { data: matchData }, { data: predData }, { data: teamData }, { data: rankData }] = await Promise.all([
       supabase.from('profiles').select('id, username, display_name, is_spectator').order('display_name'),
       supabase.from('matches').select('*, home_team:teams!home_team_id(*), away_team:teams!away_team_id(*), stage:stages(type, name)').order('match_number'),
       supabase.from('predictions').select('*, pred_home_team:teams!home_team_id(id, short_name, name, flag_url), pred_away_team:teams!away_team_id(id, short_name, name, flag_url)').order('created_at').limit(5000),
       supabase.from('teams').select('*'),
+      supabase.from('global_ranking').select('user_id, total_predictions').order('rank'),
     ])
     setUsers(profiles ?? [])
     setMatches(matchData ?? [])
     setAllPredictions(predData ?? [])
     setAllTeams(teamData ?? [])
+    setRanking(rankData ?? [])
     setLoading(false)
   }
 
@@ -174,7 +177,7 @@ export default function AdminPredictionsPage() {
           {[
             { label: 'Usuarios', value: users.length, color: 'text-green-600' },
             { label: 'Partidos', value: matches.length, color: 'text-blue-600' },
-            { label: 'Pronósticos', value: allPredictions.length, color: 'text-purple-600' },
+            { label: 'Pronósticos', value: ranking.reduce((acc: number, r: any) => acc + (r.total_predictions ?? 0), 0), color: 'text-purple-600' },
           ].map(s => (
             <div key={s.label} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
               <p className={`text-2xl font-black ${s.color}`}>{s.value}</p>
@@ -190,7 +193,7 @@ export default function AdminPredictionsPage() {
           <p className="text-sm font-bold text-gray-700 dark:text-gray-300">Exportar por usuario:</p>
           <div className="grid grid-cols-2 gap-2">
             {users.map(user => {
-              const count = allPredictions.filter(p => p.user_id === user.id).length
+              const count = ranking.find((r: any) => r.user_id === user.id)?.total_predictions ?? allPredictions.filter(p => p.user_id === user.id).length
               return (
                 <button key={user.id} onClick={() => generatePDF(user.id)} disabled={!!generating}
                   className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800 hover:bg-green-50 dark:hover:bg-green-500/10 border border-gray-200 dark:border-gray-700 hover:border-green-300 rounded-xl transition-all disabled:opacity-50">
@@ -199,7 +202,7 @@ export default function AdminPredictionsPage() {
                     {user.is_spectator && <span className="text-xs text-orange-500">👀</span>}
                   </div>
                   <span className={`text-xs flex-shrink-0 ml-2 px-2 py-0.5 rounded-full ${count > 0 ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400' : 'bg-gray-200 dark:bg-gray-700 text-gray-400'}`}>
-                    {generating === user.id ? '⏳' : count}
+                    {generating === user.id ? '⏳' : (ranking.find((r: any) => r.user_id === user.id)?.total_predictions ?? count)}
                   </span>
                 </button>
               )
