@@ -84,7 +84,8 @@ export default function RankingPage() {
           <div className="divide-y divide-gray-100 dark:divide-gray-800">
             {ranking.map((r: any) => {
               const isMe = r.user_id === user?.id
-              const failed = Math.max(0, r.total_predictions - r.exact_scores - r.correct_results)
+              const calculated = r.exact_scores + r.correct_results
+              const failed = calculated === 0 ? 0 : Math.max(0, r.total_predictions - r.exact_scores - r.correct_results)
               return (
                 <button key={r.id} onClick={() => setSelected(r)}
                   className={`w-full flex items-center px-4 py-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-800 active:bg-gray-100 dark:active:bg-gray-700 ${isMe ? 'bg-green-50 dark:bg-green-500/5' : 'bg-white dark:bg-gray-900'}`}>
@@ -178,7 +179,7 @@ export default function RankingPage() {
                 { label: 'Efectividad', value: `${getEfficiency(selected)}%`, icon: '📈', color: 'text-purple-500' },
                 { label: 'Campeón', value: selected.champion_correct ? '✅' : '❌', icon: '🏆', color: selected.champion_correct ? 'text-yellow-500' : 'text-gray-400' },
                 { label: 'Finalistas', value: `${selected.finalists_correct ?? 0}/2`, icon: '🥈', color: 'text-blue-500' },
-                { label: 'Fallados', value: Math.max(0, selected.total_predictions - selected.exact_scores - selected.correct_results), icon: '❌', color: 'text-red-500' },
+                { label: 'Fallados', value: (selected.exact_scores + selected.correct_results) === 0 ? 0 : Math.max(0, selected.total_predictions - selected.exact_scores - selected.correct_results), icon: '❌', color: 'text-red-500' },
               ].map(s => (
                 <div key={s.label} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 text-center">
                   <div className="text-xl mb-1">{s.icon}</div>
