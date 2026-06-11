@@ -234,7 +234,7 @@ function GroupDetail({ group, matches, predictions, onSave, onBack, isPrediction
         })}
       </div>
 
-      {matches.some((m: any) => !m.is_locked && m.status === 'scheduled') && (
+      {isPredictionsOpen && matches.some((m: any) => !m.is_locked && m.status === 'scheduled') && (
         <button onClick={handleSave} disabled={saving || done === 0}
           className={`w-full py-4 font-black rounded-2xl text-base disabled:opacity-50 transition-all active:scale-95 shadow-lg ${
             saved ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 border border-green-300' :
