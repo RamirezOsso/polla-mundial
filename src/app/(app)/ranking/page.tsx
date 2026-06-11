@@ -86,8 +86,8 @@ export default function RankingPage() {
           <div className="divide-y divide-gray-100 dark:divide-gray-800">
             {ranking.map((r: any) => {
               const isMe = r.user_id === user?.id
-              const calculated = r.exact_scores + r.correct_results
-              const failed = calculated === 0 ? 0 : Math.max(0, r.total_predictions - r.exact_scores - r.correct_results)
+              const calculatedCount = r.exact_scores + r.correct_results
+              const failed = calculatedCount === 0 ? 0 : Math.max(0, r.total_predictions - r.exact_scores - r.correct_results)
               return (
                 <button key={r.id} onClick={() => setSelected(r)}
                   className={`w-full flex items-center px-4 py-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-800 active:bg-gray-100 dark:active:bg-gray-700 ${isMe ? 'bg-green-50 dark:bg-green-500/5' : 'bg-white dark:bg-gray-900'}`}>
