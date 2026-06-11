@@ -211,7 +211,7 @@ function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
                   <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl px-4 py-3">
                     {m.home_team?.flag_url && <img src={m.home_team.flag_url} className="w-8 h-5 object-cover rounded flex-shrink-0"/>}
                     <span className="font-bold text-gray-900 dark:text-white text-sm flex-1">{m.home_team?.name}</span>
-                    <ScoreInput value={s?.h ?? ''} onChange={v => setScores(p => ({...p, [m.id]: {...p[m.id], h: v}}))}/>
+                    <ScoreInput value={s?.h ?? ''} onChange={v => setScores(p => ({...p, [m.id]: {...p[m.id], h: v}}))} disabled={!isPredictionsOpen}/>
                   </div>
 
                   {/* VS */}
@@ -225,7 +225,7 @@ function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
                   <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl px-4 py-3">
                     {m.away_team?.flag_url && <img src={m.away_team.flag_url} className="w-8 h-5 object-cover rounded flex-shrink-0"/>}
                     <span className="font-bold text-gray-900 dark:text-white text-sm flex-1">{m.away_team?.name}</span>
-                    <ScoreInput value={s?.a ?? ''} onChange={v => setScores(p => ({...p, [m.id]: {...p[m.id], a: v}}))}/>
+                    <ScoreInput value={s?.a ?? ''} onChange={v => setScores(p => ({...p, [m.id]: {...p[m.id], a: v}}))} disabled={!isPredictionsOpen}/>
                   </div>
                 </div>
               )}
