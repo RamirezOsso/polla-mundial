@@ -14,7 +14,7 @@ export function useGlobalRanking(page = 1, pageSize = 20) {
       const from = (page - 1) * pageSize
       const { data, count } = await supabase
         .from('global_ranking')
-        .select('*, profile:profiles!inner(username, display_name, avatar_url, country, is_spectator)', { count: 'exact' })
+        .select('*, profile:profiles!inner(username, display_name, avatar_url, country, is_spectator, created_at)', { count: 'exact' })
         .eq('profile.is_spectator', false)
         .order('total_points', { ascending: false })
         .order('exact_scores', { ascending: false })
@@ -22,7 +22,22 @@ export function useGlobalRanking(page = 1, pageSize = 20) {
         .order('champion_correct', { ascending: false })
         .order('finalists_correct', { ascending: false })
         .range(from, from + pageSize - 1)
-      setRanking(data as GlobalRanking[] ?? [])
+
+      // Ordenar en frontend: primero por puntos, si empatan por created_at
+      const sorted = (data ?? []).sort((a: any, b: any) => {
+        if (b.total_points !== a.total_points) return b.total_points - a.total_points
+        if (b.exact_scores !== a.exact_scores) return b.exact_scores - a.exact_scores
+        if (b.correct_results !== a.correct_results) return b.correct_results - a.correct_results
+        // Si todo empata (ej: al inicio sin puntos), ordenar por fecha de registro
+        const dateA = new Date(a.profile?.created_at ?? 0).getTime()
+        const dateB = new Date(b.profile?.created_at ?? 0).getTime()
+        return dateA - dateB
+      })
+
+      // Asignar números de posición consecutivos
+      sorted.forEach((r: any, i: number) => { r.rank = i + 1 })
+
+      setRanking(sorted as GlobalRanking[] ?? [])
       setCount(count ?? 0)
       setLoading(false)
     }
