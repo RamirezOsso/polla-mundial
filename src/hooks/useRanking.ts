@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { GlobalRanking } from '@/types'
 
-export function useGlobalRanking(page = 1, pageSize = 20) {
+export function useGlobalRanking(page = 1, pageSize = 100) {
   const [ranking, setRanking] = useState<GlobalRanking[]>([])
   const [count, setCount] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -11,7 +11,6 @@ export function useGlobalRanking(page = 1, pageSize = 20) {
   useEffect(() => {
     const load = async () => {
       const supabase = createClient()
-      const from = (page - 1) * pageSize
       const { data, count } = await supabase
         .from('global_ranking')
         .select('*, profile:profiles!inner(username, display_name, avatar_url, country, is_spectator, created_at)', { count: 'exact' })
@@ -21,7 +20,7 @@ export function useGlobalRanking(page = 1, pageSize = 20) {
         .order('correct_results', { ascending: false })
         .order('champion_correct', { ascending: false })
         .order('finalists_correct', { ascending: false })
-        .range(from, from + pageSize - 1)
+        .range(0, 99)
 
       // Ordenar en frontend: primero por puntos, si empatan por created_at
       const sorted = (data ?? []).sort((a: any, b: any) => {
