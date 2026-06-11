@@ -93,10 +93,10 @@ export default function RankingPage() {
                 <button key={r.id} onClick={() => setSelected(r)}
                   className={`w-full flex items-center px-4 py-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-800 active:bg-gray-100 dark:active:bg-gray-700 ${isMe ? 'bg-green-50 dark:bg-green-500/5' : 'bg-white dark:bg-gray-900'}`}>
                   {/* Posición */}
-                  <div className="w-10 flex-shrink-0">
-                    {r.rank && r.rank <= 3
-                      ? <span className="text-xl">{getRankBadge(r.rank, r.total_points)}</span>
-                      : <span className="text-sm font-bold text-gray-400">#{r.rank}</span>}
+                  <div className="w-10 flex-shrink-0 text-center">
+                    <span className="text-sm font-bold text-gray-500">
+                      {r.rank ? `#${r.rank}` : '?'}
+                    </span>
                   </div>
                   {/* Jugador */}
                   <div className="flex-1 flex items-center gap-2 min-w-0">
