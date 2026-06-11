@@ -6,9 +6,9 @@ import { usePredictions } from '@/hooks/usePredictions'
 
 const GROUPS = ['A','B','C','D','E','F','G','H','I','J','K','L']
 
-function ScoreInput({ value, onChange }: { value: number|string, onChange: (n: number|string) => void }) {
+function ScoreInput({ value, onChange, disabled }: { value: number|string, onChange: (n: number|string) => void, disabled?: boolean }) {
   return (
-    <input
+    <input disabled={disabled}
       type="number"
       inputMode="numeric"
       pattern="[0-9]*"
@@ -139,6 +139,12 @@ function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
 
   return (
     <div className="space-y-4">
+      {!isPredictionsOpen && (
+        <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-2xl px-4 py-3">
+          <p className="text-sm font-bold text-red-600 dark:text-red-400">🔒 Las predicciones están cerradas</p>
+          <p className="text-xs text-red-500 mt-0.5">Ya no puedes modificar tus pronósticos</p>
+        </div>
+      )}
       <div className="flex items-center gap-3">
         <button onClick={onBack} className="flex items-center gap-1 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
           <span>←</span><span className="text-sm">Grupos</span>
@@ -235,7 +241,7 @@ function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
       </div>
 
       {matches.some((m: any) => !m.is_locked && m.status === 'scheduled') && (
-        <button onClick={handleSave} disabled={saving || done === 0}
+        <button onClick={handleSave} disabled={saving || done === 0 || !isPredictionsOpen}
           className={`w-full py-4 font-black rounded-2xl text-base disabled:opacity-50 transition-all active:scale-95 shadow-lg ${
             saved ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 border border-green-300' :
             'bg-gradient-to-r from-green-600 to-green-500 text-white shadow-green-500/25'
@@ -250,7 +256,7 @@ function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
 export default function PronosticosPage() {
   const { user } = useAuth()
   const { matches, loading } = useMatches()
-  const { predictions, savePrediction } = usePredictions(user?.id)
+  const { predictions, savePrediction, isPredictionsOpen } = usePredictions(user?.id)
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
 
   const groupMatches = useMemo(() => matches.filter(m => m.stage?.type === 'group'), [matches])
