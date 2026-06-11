@@ -86,8 +86,7 @@ export default function RankingPage() {
           <div className="divide-y divide-gray-100 dark:divide-gray-800">
             {ranking.map((r: any) => {
               const isMe = r.user_id === user?.id
-              const calculatedCount = r.exact_scores + r.correct_results
-              const failed = calculatedCount === 0 ? 0 : Math.max(0, r.total_predictions - r.exact_scores - r.correct_results)
+              const failed = r.total_predictions === 0 ? 0 : Math.max(0, r.total_predictions - r.exact_scores - r.correct_results)
               return (
                 <button key={r.id} onClick={() => setSelected(r)}
                   className={`w-full flex items-center px-4 py-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-800 active:bg-gray-100 dark:active:bg-gray-700 ${isMe ? 'bg-green-50 dark:bg-green-500/5' : 'bg-white dark:bg-gray-900'}`}>
@@ -106,10 +105,10 @@ export default function RankingPage() {
                         {isMe && <span className="ml-1 text-green-600 dark:text-green-400 text-xs">(Tú)</span>}
                       </p>
                       <div className="flex items-center gap-2 mt-0.5">
-                        {r.total_predictions >= 104
+                        {((r as any).total_filled ?? r.total_predictions) >= 104
                           ? <span className="text-xs bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 px-1.5 py-0.5 rounded-full font-bold">✅ 104/104</span>
                           : r.total_predictions > 0
-                          ? <span className="text-xs bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 px-1.5 py-0.5 rounded-full">{r.total_predictions}/104</span>
+                          ? <span className="text-xs bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 px-1.5 py-0.5 rounded-full">{(r as any).total_filled ?? r.total_predictions}/104</span>
                           : <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-400 px-1.5 py-0.5 rounded-full">Sin pronósticos</span>
                         }
                       </div>
