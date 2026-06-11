@@ -6,11 +6,14 @@ import { Avatar } from '@/components/ui/Avatar'
 import { Modal } from '@/components/ui/Modal'
 import { Skeleton } from '@/components/ui/Skeleton'
 
-function getRankBadge(rank: number | null) {
+function getRankBadge(rank: number | null, points: number) {
   if (rank === null || rank === undefined) return '?'
-  if (rank === 1) return '🥇'
-  if (rank === 2) return '🥈'
-  if (rank === 3) return '🥉'
+  // Solo mostrar medallas si hay puntos
+  if (points > 0) {
+    if (rank === 1) return '🥇'
+    if (rank === 2) return '🥈'
+    if (rank === 3) return '🥉'
+  }
   return '#' + rank
 }
 
@@ -92,7 +95,7 @@ export default function RankingPage() {
                   {/* Posición */}
                   <div className="w-10 flex-shrink-0">
                     {r.rank && r.rank <= 3
-                      ? <span className="text-xl">{getRankBadge(r.rank)}</span>
+                      ? <span className="text-xl">{getRankBadge(r.rank, r.total_points)}</span>
                       : <span className="text-sm font-bold text-gray-400">#{r.rank}</span>}
                   </div>
                   {/* Jugador */}
@@ -165,7 +168,7 @@ export default function RankingPage() {
               <Avatar src={selected.profile?.avatar_url} name={selected.profile?.display_name || selected.profile?.username} size="xl"/>
               <div>
                 <p className="text-xl font-black text-gray-900 dark:text-white">{selected.profile?.display_name || selected.profile?.username}</p>
-                <p className="text-gray-500 text-sm">Puesto {getRankBadge(selected.rank)}</p>
+                <p className="text-gray-500 text-sm">Puesto {getRankBadge(selected.rank, selected.total_points)}</p>
                 {selected.profile?.favorite_team && <p className="text-xs text-gray-400 mt-1">❤️ {selected.profile.favorite_team}</p>}
                 {selected.profile?.country && <p className="text-xs text-gray-400">🌍 {selected.profile.country}</p>}
               </div>
