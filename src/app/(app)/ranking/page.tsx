@@ -24,8 +24,7 @@ function getEfficiency(r: any) {
 
 export default function RankingPage() {
   const { user } = useAuth()
-  const [page, setPage] = useState(1)
-  const { ranking, count, loading } = useGlobalRanking(page)
+  const { ranking, count, loading } = useGlobalRanking(1)
   const [selected, setSelected] = useState<any>(null)
   const pageSize = 20
 
@@ -145,19 +144,6 @@ export default function RankingPage() {
       </div>
 
       {/* Paginación */}
-      {count > pageSize && (
-        <div className="flex items-center justify-center gap-3">
-          <button disabled={page === 1} onClick={() => setPage(p => p - 1)}
-            className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-600 dark:text-gray-300 disabled:opacity-40">
-            ← Anterior
-          </button>
-          <span className="text-sm text-gray-500">Pagina {page} de {Math.ceil(count / pageSize)}</span>
-          <button disabled={page >= Math.ceil(count / pageSize)} onClick={() => setPage(p => p + 1)}
-            className="px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-600 dark:text-gray-300 disabled:opacity-40">
-            Siguiente →
-          </button>
-        </div>
-      )}
 
       {/* Modal detalle */}
       <Modal open={!!selected} onClose={() => setSelected(null)}
