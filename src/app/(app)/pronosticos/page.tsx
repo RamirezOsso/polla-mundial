@@ -91,7 +91,7 @@ function GroupCard({ group, matches, predictions, onClick }: any) {
   )
 }
 
-function GroupDetail({ group, matches, predictions, onSave, onBack }: any) {
+function GroupDetail({ group, matches, predictions, onSave, onBack, isPredictionsOpen }: any) {
   const predMap = new Map<string, any>(predictions.map((p: any) => [p.match_id, p]))
   const [scores, setScores] = useState<Record<string, {h: number|string, a: number|string}>>(() => {
     const init: Record<string, any> = {}
