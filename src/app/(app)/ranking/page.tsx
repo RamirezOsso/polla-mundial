@@ -91,7 +91,20 @@ export default function RankingPage() {
               const isMe = r.user_id === user?.id
               const failed = r.total_predictions === 0 ? 0 : Math.max(0, r.total_predictions - r.exact_scores - r.correct_results)
               return (
-                <button key={r.id} onClick={() => setSelected(r)}
+                <button key={r.id} onClick={async () => {
+                    setSelected(r)
+                    setLoadingPreds(true)
+                    setSelectedPreds([])
+                    const supabase = createClient()
+                    const { data } = await supabase
+                      .from('predictions')
+                      .select('*, match:matches!inner(match_number, home_score, away_score, match_date, home_team:teams!home_team_id(short_name, flag_url), away_team:teams!away_team_id(short_name, flag_url))')
+                      .eq('user_id', r.user_id)
+                      .eq('is_calculated', true)
+                      .order('created_at', { ascending: false })
+                    setSelectedPreds(data ?? [])
+                    setLoadingPreds(false)
+                  }}
                   className={`w-full flex items-center px-4 py-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-800 active:bg-gray-100 dark:active:bg-gray-700 ${isMe ? 'bg-green-50 dark:bg-green-500/5' : 'bg-white dark:bg-gray-900'}`}>
                   {/* Posición */}
                   <div className="w-10 flex-shrink-0 text-center">
