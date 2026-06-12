@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
+import { createClient } from '@/lib/supabase/client'
 import { useGlobalRanking } from '@/hooks/useRanking'
 import { Avatar } from '@/components/ui/Avatar'
 import { Modal } from '@/components/ui/Modal'
@@ -26,6 +27,8 @@ export default function RankingPage() {
   const { user } = useAuth()
   const { ranking, count, loading } = useGlobalRanking(1)
   const [selected, setSelected] = useState<any>(null)
+  const [selectedPreds, setSelectedPreds] = useState<any[]>([])
+  const [loadingPreds, setLoadingPreds] = useState(false)
   const pageSize = 20
 
   return (
@@ -145,55 +148,82 @@ export default function RankingPage() {
       {/* Paginación */}
 
       {/* Modal detalle */}
-      <Modal open={!!selected} onClose={() => setSelected(null)}
+      <Modal open={!!selected} onClose={() => { setSelected(null); setSelectedPreds([]) }}
         title={selected?.profile?.display_name || selected?.profile?.username || ''}>
         {selected && (
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <Avatar src={selected.profile?.avatar_url} name={selected.profile?.display_name || selected.profile?.username} size="xl"/>
-              <div>
-                <p className="text-xl font-black text-gray-900 dark:text-white">{selected.profile?.display_name || selected.profile?.username}</p>
-                <p className="text-gray-500 text-sm">Puesto {getRankBadge(selected.rank, selected.total_points)}</p>
-                {selected.profile?.favorite_team && <p className="text-xs text-gray-400 mt-1">❤️ {selected.profile.favorite_team}</p>}
-                {selected.profile?.country && <p className="text-xs text-gray-400">🌍 {selected.profile.country}</p>}
+          <div className="space-y-3">
+            {/* Header compacto */}
+            <div className="flex items-center gap-3">
+              <Avatar src={selected.profile?.avatar_url} name={selected.profile?.display_name || selected.profile?.username} size="lg"/>
+              <div className="flex-1">
+                <p className="text-lg font-black text-gray-900 dark:text-white">{selected.profile?.display_name || selected.profile?.username}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-sm font-bold text-green-600 dark:text-green-400">{selected.total_points} pts</span>
+                  <span className="text-gray-300 dark:text-gray-600">·</span>
+                  <span className="text-sm text-gray-500">Puesto #{selected.rank ?? '?'}</span>
+                  <span className="text-gray-300 dark:text-gray-600">·</span>
+                  <span className="text-sm text-gray-500">{getEfficiency(selected)}% efect.</span>
+                </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+
+            {/* Stats en fila */}
+            <div className="grid grid-cols-4 gap-2">
               {[
-                { label: 'Puntos', value: selected.total_points, icon: '⭐', color: 'text-yellow-500' },
-                { label: 'Predicciones', value: selected.total_predictions, icon: '📋', color: 'text-gray-500' },
-                { label: 'Exactos', value: selected.exact_scores, icon: '🎯', color: 'text-green-500' },
-                { label: 'Acertados', value: selected.correct_results, icon: '✅', color: 'text-blue-500' },
-                { label: 'Efectividad', value: `${getEfficiency(selected)}%`, icon: '📈', color: 'text-purple-500' },
-                { label: 'Campeón', value: selected.champion_correct ? '✅' : '❌', icon: '🏆', color: selected.champion_correct ? 'text-yellow-500' : 'text-gray-400' },
-                { label: 'Finalistas', value: `${selected.finalists_correct ?? 0}/2`, icon: '🥈', color: 'text-blue-500' },
-                { label: 'Fallados', value: (selected.exact_scores + selected.correct_results) === 0 ? 0 : Math.max(0, selected.total_predictions - selected.exact_scores - selected.correct_results), icon: '❌', color: 'text-red-500' },
+                { label: 'Exactos', value: selected.exact_scores, color: 'text-green-500', bg: 'bg-green-50 dark:bg-green-500/10' },
+                { label: 'Correctos', value: selected.correct_results, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-500/10' },
+                { label: 'Fallados', value: (selected.exact_scores + selected.correct_results) === 0 ? 0 : Math.max(0, selected.total_predictions - selected.exact_scores - selected.correct_results), color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-500/10' },
+                { label: 'Jugados', value: selected.total_predictions, color: 'text-gray-500', bg: 'bg-gray-50 dark:bg-gray-800' },
               ].map(s => (
-                <div key={s.label} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 text-center">
-                  <div className="text-xl mb-1">{s.icon}</div>
-                  <div className={`text-2xl font-black ${s.color}`}>{s.value}</div>
-                  <div className="text-xs text-gray-400 mt-0.5">{s.label}</div>
+                <div key={s.label} className={`${s.bg} rounded-xl p-2 text-center`}>
+                  <div className={`text-xl font-black ${s.color}`}>{s.value}</div>
+                  <div className="text-xs text-gray-400">{s.label}</div>
                 </div>
               ))}
             </div>
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
-              <p className="text-xs font-bold text-gray-500 mb-2">Criterios de desempate</p>
-              <div className="space-y-1">
-                {[
-                  { n: 1, label: 'Total de puntos', value: selected.total_points },
-                  { n: 2, label: 'Marcadores exactos', value: selected.exact_scores },
-                  { n: 3, label: 'Resultados correctos', value: selected.correct_results },
-                  { n: 4, label: 'Campeón acertado', value: selected.champion_correct ? 'Sí ✅' : 'No ❌' },
-                  { n: 5, label: 'Finalistas acertados', value: `${selected.finalists_correct ?? 0}/2` },
-                  { n: 6, label: 'Efectividad', value: `${getEfficiency(selected)}%` },
-                  { n: 7, label: 'Decisión de participantes', value: '—' },
-                ].map(c => (
-                  <div key={c.n} className="flex items-center justify-between">
-                    <span className="text-xs text-gray-400">{c.n}. {c.label}</span>
-                    <span className="text-xs font-bold text-gray-900 dark:text-white">{c.value}</span>
-                  </div>
-                ))}
+
+            {/* Pronósticos publicados */}
+            <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+              <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800">
+                <p className="text-xs font-bold text-gray-700 dark:text-gray-300">⚽ Pronósticos en partidos publicados</p>
               </div>
+              {loadingPreds ? (
+                <div className="py-6 text-center text-xs text-gray-400">Cargando...</div>
+              ) : selectedPreds.length === 0 ? (
+                <div className="py-6 text-center text-xs text-gray-400">Sin partidos publicados aún</div>
+              ) : (
+                <div className="divide-y divide-gray-100 dark:divide-gray-800 max-h-64 overflow-y-auto">
+                  {selectedPreds.map(pred => {
+                    const m = (pred as any).match
+                    const isExact = pred.points_earned >= 5
+                    const isCorrect = pred.points_earned >= 3 && pred.points_earned < 5
+                    const isFail = pred.points_earned === 0
+                    return (
+                      <div key={pred.id} className="flex items-center gap-2 px-3 py-2">
+                        {/* Equipos reales */}
+                        <div className="flex items-center gap-1 flex-1 min-w-0">
+                          {m?.home_team?.flag_url && <img src={m.home_team.flag_url} className="w-4 h-3 object-cover rounded flex-shrink-0"/>}
+                          <span className="text-xs text-gray-500 truncate">{m?.home_team?.short_name}</span>
+                          <span className="text-xs font-black text-gray-900 dark:text-white mx-1">{m?.home_score}-{m?.away_score}</span>
+                          <span className="text-xs text-gray-500 truncate">{m?.away_team?.short_name}</span>
+                          {m?.away_team?.flag_url && <img src={m.away_team.flag_url} className="w-4 h-3 object-cover rounded flex-shrink-0"/>}
+                        </div>
+                        {/* Pronóstico */}
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <span className="text-xs text-gray-400">Pred:</span>
+                          <span className={`text-xs font-bold ${isExact ? 'text-green-500' : isCorrect ? 'text-blue-500' : 'text-red-400'}`}>
+                            {pred.home_score}-{pred.away_score}
+                          </span>
+                        </div>
+                        {/* Puntos */}
+                        <span className={`text-xs font-black flex-shrink-0 w-8 text-right ${isExact ? 'text-green-500' : isCorrect ? 'text-blue-500' : 'text-gray-300'}`}>
+                          {pred.points_earned > 0 ? `+${pred.points_earned}` : '0'}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           </div>
         )}
