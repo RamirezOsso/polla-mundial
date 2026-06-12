@@ -15,8 +15,28 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!user) return
-    createClient().from('global_ranking').select('*').eq('user_id', user.id).single()
-      .then(({ data }) => setUserRank(data))
+    // Cargar ranking completo para calcular posición correcta igual que la página de ranking
+    createClient()
+      .from('global_ranking')
+      .select('*, profile:profiles!inner(username, display_name, is_spectator, created_at)')
+      .eq('profile.is_spectator', false)
+      .order('total_points', { ascending: false })
+      .order('exact_scores', { ascending: false })
+      .order('correct_results', { ascending: false })
+      .then(({ data }) => {
+        if (!data) return
+        const sorted = data.sort((a: any, b: any) => {
+          if (b.total_points !== a.total_points) return b.total_points - a.total_points
+          if (b.exact_scores !== a.exact_scores) return b.exact_scores - a.exact_scores
+          if (b.correct_results !== a.correct_results) return b.correct_results - a.correct_results
+          const dateA = new Date(a.profile?.created_at ?? 0).getTime()
+          const dateB = new Date(b.profile?.created_at ?? 0).getTime()
+          return dateA - dateB
+        })
+        const idx = sorted.findIndex((r: any) => r.user_id === user.id)
+        const myRank = sorted[idx]
+        if (myRank) setUserRank({ ...myRank, rank: idx + 1 })
+      })
   }, [user])
 
   const predMap = new Map(predictions.map(p => [p.match_id, p]))
