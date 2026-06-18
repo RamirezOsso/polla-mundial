@@ -98,7 +98,7 @@ export default function RankingPage() {
                     const supabase = createClient()
                     const { data } = await supabase
                       .from('predictions')
-                      .select('*, match:matches!inner(match_number, home_score, away_score, match_date, home_team:teams!home_team_id(short_name, flag_url), away_team:teams!away_team_id(short_name, flag_url))')
+                      .select('*, match:matches!inner(match_number, home_score, away_score, match_date, stage:stages(type), home_team:teams!home_team_id(short_name, flag_url), away_team:teams!away_team_id(short_name, flag_url)), pred_home_team:teams!home_team_id(short_name, flag_url), pred_away_team:teams!away_team_id(short_name, flag_url)')
                       .eq('user_id', r.user_id)
                       .eq('is_calculated', true)
                     const sorted = (data ?? []).sort((a: any, b: any) => {
@@ -215,27 +215,39 @@ export default function RankingPage() {
                     const isExact = pred.points_earned >= 5
                     const isCorrect = pred.points_earned >= 3 && pred.points_earned < 5
                     const isFail = pred.points_earned === 0
+                    const isGroup = (m as any)?.stage?.type === 'group'
+                    // Equipos para mostrar: en grupos usar match, en eliminatorias usar pred
+                    const predHome = (pred as any).pred_home_team
+                    const predAway = (pred as any).pred_away_team
                     return (
-                      <div key={pred.id} className="flex items-center gap-2 px-3 py-2">
-                        {/* Equipos reales */}
-                        <div className="flex items-center gap-1 flex-1 min-w-0">
+                      <div key={pred.id} className="px-3 py-2 space-y-1">
+                        {/* Resultado real */}
+                        <div className="flex items-center gap-1">
                           {m?.home_team?.flag_url && <img src={m.home_team.flag_url} className="w-4 h-3 object-cover rounded flex-shrink-0"/>}
                           <span className="text-xs text-gray-500 truncate">{m?.home_team?.short_name}</span>
                           <span className="text-xs font-black text-gray-900 dark:text-white mx-1">{m?.home_score}-{m?.away_score}</span>
                           <span className="text-xs text-gray-500 truncate">{m?.away_team?.short_name}</span>
                           {m?.away_team?.flag_url && <img src={m.away_team.flag_url} className="w-4 h-3 object-cover rounded flex-shrink-0"/>}
+                          {!isGroup && <span className="ml-1 text-xs text-gray-300">real</span>}
                         </div>
-                        {/* Pronóstico */}
-                        <div className="flex items-center gap-1 flex-shrink-0">
-                          <span className="text-xs text-gray-400">Pred:</span>
-                          <span className={`text-xs font-bold ${isExact ? 'text-green-500' : isCorrect ? 'text-blue-500' : 'text-red-400'}`}>
+                        {/* Pronóstico del usuario */}
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-gray-300 w-3">→</span>
+                          {(isGroup ? m?.home_team : predHome)?.flag_url && <img src={(isGroup ? m?.home_team : predHome)?.flag_url} className="w-4 h-3 object-cover rounded flex-shrink-0"/>}
+                          <span className={`text-xs truncate ${isExact ? 'text-green-500 font-bold' : isCorrect ? 'text-blue-400' : 'text-gray-500'}`}>
+                            {isGroup ? m?.home_team?.short_name : predHome?.short_name || '?'}
+                          </span>
+                          <span className={`text-xs font-black mx-1 ${isExact ? 'text-green-500' : isCorrect ? 'text-blue-400' : 'text-red-400'}`}>
                             {pred.home_score}-{pred.away_score}
                           </span>
+                          <span className={`text-xs truncate ${isExact ? 'text-green-500 font-bold' : isCorrect ? 'text-blue-400' : 'text-gray-500'}`}>
+                            {isGroup ? m?.away_team?.short_name : predAway?.short_name || '?'}
+                          </span>
+                          {(isGroup ? m?.away_team : predAway)?.flag_url && <img src={(isGroup ? m?.away_team : predAway)?.flag_url} className="w-4 h-3 object-cover rounded flex-shrink-0"/>}
+                          <span className={`ml-auto text-xs font-black flex-shrink-0 ${isExact ? 'text-green-500' : isCorrect ? 'text-blue-400' : 'text-gray-300'}`}>
+                            {pred.points_earned > 0 ? `+${pred.points_earned}` : '0'}
+                          </span>
                         </div>
-                        {/* Puntos */}
-                        <span className={`text-xs font-black flex-shrink-0 w-8 text-right ${isExact ? 'text-green-500' : isCorrect ? 'text-blue-500' : 'text-gray-300'}`}>
-                          {pred.points_earned > 0 ? `+${pred.points_earned}` : '0'}
-                        </span>
                       </div>
                     )
                   })}
