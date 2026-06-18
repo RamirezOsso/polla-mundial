@@ -254,20 +254,22 @@ export default function RankingPage() {
                               {/* Fila: Real vs Pronóstico vs Puntos */}
                               <div className="flex items-center gap-2">
                                 {/* Resultado real */}
-                                <div className="flex items-center gap-1 w-24 flex-shrink-0">
-                                  {m?.home_team?.flag_url && <img src={m.home_team.flag_url} className="w-4 h-3 object-cover rounded"/>}
+                                <div className="flex items-center gap-1 flex-1 min-w-0">
+                                  <span className="text-xs text-gray-400 flex-shrink-0 w-7">Real</span>
+                                  {m?.home_team?.flag_url && <img src={m.home_team.flag_url} className="w-4 h-3 object-cover rounded flex-shrink-0"/>}
                                   <span className="text-xs font-black text-gray-900 dark:text-white">{m?.home_score}-{m?.away_score}</span>
-                                  {m?.away_team?.flag_url && <img src={m.away_team.flag_url} className="w-4 h-3 object-cover rounded"/>}
+                                  {m?.away_team?.flag_url && <img src={m.away_team.flag_url} className="w-4 h-3 object-cover rounded flex-shrink-0"/>}
                                 </div>
                                 {/* Separador */}
-                                <span className="text-gray-300 text-xs">|</span>
+                                <span className="text-gray-200 dark:text-gray-700 text-xs">|</span>
                                 {/* Pronóstico usuario */}
                                 <div className="flex items-center gap-1 flex-1 min-w-0">
-                                  {dispHome?.flag_url && <img src={dispHome.flag_url} className="w-4 h-3 object-cover rounded"/>}
+                                  <span className="text-xs text-gray-400 flex-shrink-0 w-7">Pred</span>
+                                  {dispHome?.flag_url && <img src={dispHome.flag_url} className="w-4 h-3 object-cover rounded flex-shrink-0"/>}
                                   <span className={`text-xs font-black ${isExact ? 'text-green-500' : isCorrect ? 'text-blue-400' : 'text-red-400'}`}>
                                     {pred.home_score}-{pred.away_score}
                                   </span>
-                                  {dispAway?.flag_url && <img src={dispAway.flag_url} className="w-4 h-3 object-cover rounded"/>}
+                                  {dispAway?.flag_url && <img src={dispAway.flag_url} className="w-4 h-3 object-cover rounded flex-shrink-0"/>}
                                 </div>
                                 {/* Puntos */}
                                 <span className={`text-xs font-black w-8 text-right flex-shrink-0 ${isExact ? 'text-green-500' : isCorrect ? 'text-blue-400' : 'text-gray-300'}`}>
