@@ -101,7 +101,7 @@ export default function RankingPage() {
                       .select('*, match:matches!inner(match_number, home_score, away_score, match_date, home_team:teams!home_team_id(short_name, flag_url), away_team:teams!away_team_id(short_name, flag_url))')
                       .eq('user_id', r.user_id)
                       .eq('is_calculated', true)
-                      .order('created_at', { ascending: false })
+                      .order('match_date', { ascending: false, referencedTable: 'matches' })
                     setSelectedPreds(data ?? [])
                     setLoadingPreds(false)
                   }}
