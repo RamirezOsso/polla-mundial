@@ -101,8 +101,12 @@ export default function RankingPage() {
                       .select('*, match:matches!inner(match_number, home_score, away_score, match_date, home_team:teams!home_team_id(short_name, flag_url), away_team:teams!away_team_id(short_name, flag_url))')
                       .eq('user_id', r.user_id)
                       .eq('is_calculated', true)
-                      .order('match_date', { ascending: false, referencedTable: 'matches' })
-                    setSelectedPreds(data ?? [])
+                    const sorted = (data ?? []).sort((a: any, b: any) => {
+                      const dateA = new Date(a.match?.match_date ?? 0).getTime()
+                      const dateB = new Date(b.match?.match_date ?? 0).getTime()
+                      return dateB - dateA
+                    })
+                    setSelectedPreds(sorted)
                     setLoadingPreds(false)
                   }}
                   className={`w-full flex items-center px-4 py-3 transition-all hover:bg-gray-50 dark:hover:bg-gray-800 active:bg-gray-100 dark:active:bg-gray-700 ${isMe ? 'bg-green-50 dark:bg-green-500/5' : 'bg-white dark:bg-gray-900'}`}>
