@@ -29,6 +29,7 @@ export default function RankingPage() {
   const [selected, setSelected] = useState<any>(null)
   const [selectedPreds, setSelectedPreds] = useState<any[]>([])
   const [loadingPreds, setLoadingPreds] = useState(false)
+  const [predTab, setPredTab] = useState('group')
   const pageSize = 20
 
   return (
@@ -199,61 +200,89 @@ export default function RankingPage() {
               ))}
             </div>
 
-            {/* Pronósticos publicados */}
-            <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
-              <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800">
-                <p className="text-xs font-bold text-gray-700 dark:text-gray-300">⚽ Pronósticos en partidos publicados</p>
-              </div>
-              {loadingPreds ? (
-                <div className="py-6 text-center text-xs text-gray-400">Cargando...</div>
-              ) : selectedPreds.length === 0 ? (
-                <div className="py-6 text-center text-xs text-gray-400">Sin partidos publicados aún</div>
-              ) : (
-                <div className="divide-y divide-gray-100 dark:divide-gray-800 max-h-64 overflow-y-auto">
-                  {selectedPreds.map(pred => {
-                    const m = (pred as any).match
-                    const isExact = pred.points_earned >= 5
-                    const isCorrect = pred.points_earned >= 3 && pred.points_earned < 5
-                    const isFail = pred.points_earned === 0
-                    const isGroup = (m as any)?.stage?.type === 'group'
-                    // Equipos para mostrar: en grupos usar match, en eliminatorias usar pred
-                    const predHome = (pred as any).pred_home_team
-                    const predAway = (pred as any).pred_away_team
-                    return (
-                      <div key={pred.id} className="px-3 py-2 space-y-1">
-                        {/* Resultado real */}
-                        <div className="flex items-center gap-1">
-                          {m?.home_team?.flag_url && <img src={m.home_team.flag_url} className="w-4 h-3 object-cover rounded flex-shrink-0"/>}
-                          <span className="text-xs text-gray-500 truncate">{m?.home_team?.short_name}</span>
-                          <span className="text-xs font-black text-gray-900 dark:text-white mx-1">{m?.home_score}-{m?.away_score}</span>
-                          <span className="text-xs text-gray-500 truncate">{m?.away_team?.short_name}</span>
-                          {m?.away_team?.flag_url && <img src={m.away_team.flag_url} className="w-4 h-3 object-cover rounded flex-shrink-0"/>}
-                          {!isGroup && <span className="ml-1 text-xs text-gray-300">real</span>}
-                        </div>
-                        {/* Pronóstico del usuario */}
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs text-gray-300 w-3">→</span>
-                          {(isGroup ? m?.home_team : predHome)?.flag_url && <img src={(isGroup ? m?.home_team : predHome)?.flag_url} className="w-4 h-3 object-cover rounded flex-shrink-0"/>}
-                          <span className={`text-xs truncate ${isExact ? 'text-green-500 font-bold' : isCorrect ? 'text-blue-400' : 'text-gray-500'}`}>
-                            {isGroup ? m?.home_team?.short_name : predHome?.short_name || '?'}
-                          </span>
-                          <span className={`text-xs font-black mx-1 ${isExact ? 'text-green-500' : isCorrect ? 'text-blue-400' : 'text-red-400'}`}>
-                            {pred.home_score}-{pred.away_score}
-                          </span>
-                          <span className={`text-xs truncate ${isExact ? 'text-green-500 font-bold' : isCorrect ? 'text-blue-400' : 'text-gray-500'}`}>
-                            {isGroup ? m?.away_team?.short_name : predAway?.short_name || '?'}
-                          </span>
-                          {(isGroup ? m?.away_team : predAway)?.flag_url && <img src={(isGroup ? m?.away_team : predAway)?.flag_url} className="w-4 h-3 object-cover rounded flex-shrink-0"/>}
-                          <span className={`ml-auto text-xs font-black flex-shrink-0 ${isExact ? 'text-green-500' : isCorrect ? 'text-blue-400' : 'text-gray-300'}`}>
-                            {pred.points_earned > 0 ? `+${pred.points_earned}` : '0'}
-                          </span>
-                        </div>
+            {/* Pronósticos por fase */}
+            {(() => {
+              const TABS = [
+                { key: 'group', label: '⚽', name: 'Grupos' },
+                { key: 'round_of_32', label: '🔵', name: 'R32' },
+                { key: 'round_of_16', label: '🟡', name: 'Octavos' },
+                { key: 'quarter_final', label: '🟠', name: 'Cuartos' },
+                { key: 'semi_final', label: '🔴', name: 'Semis' },
+                { key: 'third_place', label: '🥉', name: '3°' },
+                { key: 'final', label: '🏆', name: 'Final' },
+              ]
+              const predsForTab = selectedPreds.filter(p => (p as any).match?.stage?.type === predTab)
+              const tabPoints = predsForTab.reduce((sum: number, p: any) => sum + (p.points_earned || 0), 0)
+              return (
+                <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                  {/* Tabs scrollable */}
+                  <div className="flex overflow-x-auto border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                    {TABS.map(t => {
+                      const count = selectedPreds.filter(p => (p as any).match?.stage?.type === t.key).length
+                      if (count === 0 && t.key !== 'group') return null
+                      return (
+                        <button key={t.key} onClick={() => setPredTab(t.key)}
+                          className={`flex-shrink-0 px-3 py-2 text-xs font-bold transition-all border-b-2 ${predTab === t.key ? 'border-green-500 text-green-600 dark:text-green-400 bg-white dark:bg-gray-900' : 'border-transparent text-gray-400'}`}>
+                          {t.label} {t.name}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {loadingPreds ? (
+                    <div className="py-6 text-center text-xs text-gray-400">Cargando...</div>
+                  ) : predsForTab.length === 0 ? (
+                    <div className="py-6 text-center text-xs text-gray-400">Sin partidos publicados en esta fase</div>
+                  ) : (
+                    <>
+                      {/* Total puntos fase */}
+                      <div className="px-3 py-1.5 bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
+                        <span className="text-xs text-gray-400">{predsForTab.length} partidos</span>
+                        <span className="text-xs font-black text-green-600 dark:text-green-400">+{tabPoints} pts en esta fase</span>
                       </div>
-                    )
-                  })}
+                      <div className="divide-y divide-gray-100 dark:divide-gray-800 max-h-56 overflow-y-auto">
+                        {predsForTab.map((pred: any) => {
+                          const m = pred.match
+                          const isExact = pred.points_earned >= 5
+                          const isCorrect = pred.points_earned >= 3 && pred.points_earned < 5
+                          const isGroup = m?.stage?.type === 'group'
+                          const predHome = pred.pred_home_team
+                          const predAway = pred.pred_away_team
+                          const dispHome = isGroup ? m?.home_team : predHome
+                          const dispAway = isGroup ? m?.away_team : predAway
+                          return (
+                            <div key={pred.id} className="px-3 py-2">
+                              {/* Fila: Real vs Pronóstico vs Puntos */}
+                              <div className="flex items-center gap-2">
+                                {/* Resultado real */}
+                                <div className="flex items-center gap-1 w-24 flex-shrink-0">
+                                  {m?.home_team?.flag_url && <img src={m.home_team.flag_url} className="w-4 h-3 object-cover rounded"/>}
+                                  <span className="text-xs font-black text-gray-900 dark:text-white">{m?.home_score}-{m?.away_score}</span>
+                                  {m?.away_team?.flag_url && <img src={m.away_team.flag_url} className="w-4 h-3 object-cover rounded"/>}
+                                </div>
+                                {/* Separador */}
+                                <span className="text-gray-300 text-xs">|</span>
+                                {/* Pronóstico usuario */}
+                                <div className="flex items-center gap-1 flex-1 min-w-0">
+                                  {dispHome?.flag_url && <img src={dispHome.flag_url} className="w-4 h-3 object-cover rounded"/>}
+                                  <span className={`text-xs font-black ${isExact ? 'text-green-500' : isCorrect ? 'text-blue-400' : 'text-red-400'}`}>
+                                    {pred.home_score}-{pred.away_score}
+                                  </span>
+                                  {dispAway?.flag_url && <img src={dispAway.flag_url} className="w-4 h-3 object-cover rounded"/>}
+                                </div>
+                                {/* Puntos */}
+                                <span className={`text-xs font-black w-8 text-right flex-shrink-0 ${isExact ? 'text-green-500' : isCorrect ? 'text-blue-400' : 'text-gray-300'}`}>
+                                  {pred.points_earned > 0 ? `+${pred.points_earned}` : '0'}
+                                </span>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </>
+                  )}
                 </div>
-              )}
-            </div>
+              )
+            })()}
           </div>
         )}
       </Modal>
