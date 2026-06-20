@@ -42,9 +42,9 @@ function calcStandings(matches: any[], predMap: Map<string, any>, group: string)
     if (!teams[m.home_team_id]) teams[m.home_team_id] = { ...m.home_team, pts: 0, gd: 0, gf: 0, ga: 0 }
     if (!teams[m.away_team_id]) teams[m.away_team_id] = { ...m.away_team, pts: 0, gd: 0, gf: 0, ga: 0 }
     const pred = predMap.get(m.id)
-    const isFinished = m.status === 'finished'
-    const h = isFinished ? m.home_score : pred?.home_score
-    const a = isFinished ? m.away_score : pred?.away_score
+    // SIEMPRE usar pronósticos del usuario, nunca resultados reales
+    const h = pred?.home_score
+    const a = pred?.away_score
     if (h == null || a == null) return
     teams[m.home_team_id].gf += h; teams[m.away_team_id].gf += a
     teams[m.home_team_id].ga += a; teams[m.away_team_id].ga += h
@@ -58,9 +58,7 @@ function calcStandings(matches: any[], predMap: Map<string, any>, group: string)
 
 function getWinner(predMap: Map<string, any>, match: any, homeTeam: any, awayTeam: any) {
   if (!match || !homeTeam || !awayTeam) return null
-  if (match.status === 'finished') {
-    return match.home_score > match.away_score ? match.home_team : match.away_team
-  }
+  // SIEMPRE usar pronósticos del usuario
   const pred = predMap.get(match.id)
   if (!pred || pred.home_score == null || pred.away_score == null) return null
   if (Number(pred.home_score) === Number(pred.away_score)) return null
@@ -117,7 +115,10 @@ function MatchCard({ match, homeTeam, awayTeam, prediction, onSave, pts, isLocke
   const handleSave = async () => {
     if (home === '' || away === '' || Number(home) === Number(away)) return
     setSaving(true)
-    await onSave(match.id, Number(home), Number(away), homeTeam?.id, awayTeam?.id)
+    // Si ya tiene equipos guardados en la predicción, no sobreescribir con los recalculados
+    const existingHomeId = prediction?.home_team_id || homeTeam?.id
+    const existingAwayId = prediction?.away_team_id || awayTeam?.id
+    await onSave(match.id, Number(home), Number(away), existingHomeId, existingAwayId)
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)
     setSaving(false)
