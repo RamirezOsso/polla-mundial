@@ -44,12 +44,15 @@ export default function RankingPage() {
         <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3">⭐ Sistema de puntos</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {[
-            { label: 'Marcador exacto', pts: '5 pts', color: 'text-green-600 dark:text-green-400', icon: '🎯' },
-            { label: 'Resultado correcto', pts: '3 pts', color: 'text-blue-600 dark:text-blue-400', icon: '✅' },
-            { label: 'Clasif. Octavos', pts: '5 pts', color: 'text-yellow-600 dark:text-yellow-400', icon: '⚽' },
-            { label: 'Clasif. Cuartos', pts: '7 pts', color: 'text-orange-600 dark:text-orange-400', icon: '⚽' },
-            { label: 'Clasif. Semis', pts: '10 pts', color: 'text-purple-600 dark:text-purple-400', icon: '⚽' },
-            { label: 'Campeon', pts: '25 pts', color: 'text-yellow-500', icon: '🏆' },
+            { label: 'Exacto grupos', pts: '+5 pts', color: 'text-green-600 dark:text-green-400', icon: '🎯' },
+            { label: 'Correcto grupos', pts: '+3 pts', color: 'text-blue-600 dark:text-blue-400', icon: '✅' },
+            { label: 'Clasif. a R32', pts: '+3 pts', color: 'text-cyan-600 dark:text-cyan-400', icon: '⚽' },
+            { label: 'Avance Octavos', pts: '+5 pts', color: 'text-yellow-600 dark:text-yellow-400', icon: '⚽' },
+            { label: 'Avance Cuartos', pts: '+7 pts', color: 'text-orange-600 dark:text-orange-400', icon: '⚽' },
+            { label: 'Avance Semis', pts: '+10 pts', color: 'text-purple-600 dark:text-purple-400', icon: '⚽' },
+            { label: 'Avance Final', pts: '+15 pts', color: 'text-red-600 dark:text-red-400', icon: '⭐' },
+            { label: '3er Lugar', pts: '+10 pts', color: 'text-amber-600 dark:text-amber-400', icon: '🥉' },
+            { label: 'Campeón', pts: '+25 pts', color: 'text-yellow-500', icon: '🏆' },
           ].map(r => (
             <div key={r.label} className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2">
               <span className="text-xs text-gray-500 flex items-center gap-1">{r.icon} {r.label}</span>
