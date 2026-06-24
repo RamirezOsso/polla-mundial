@@ -30,7 +30,7 @@ const R32_OFFICIAL = [
   { idx: 9,  home: {g:'D',r:1}, away: {thirds:['B','E','F','I','J']}, label: '1°D vs Mejor 3°(B/E/F/I/J)' },
   { idx: 10, home: {g:'H',r:1}, away: {g:'J',r:2}, label: '1°H vs 2°J' },
   { idx: 11, home: {g:'K',r:2}, away: {g:'L',r:2}, label: '2°K vs 2°L' },
-  { idx: 12, home: {g:'B',r:1}, away: {thirds:['D','E','I','J','L']}, label: '1°B vs Mejor 3°(D/E/I/J/L)' },
+  { idx: 12, home: {g:'B',r:1}, away: {thirds:['E','F','G','I','J']}, label: '1°B vs Mejor 3°(E/F/G/I/J)' },
   { idx: 13, home: {g:'D',r:2}, away: {g:'G',r:2}, label: '2°D vs 2°G' },
   { idx: 14, home: {g:'J',r:1}, away: {g:'H',r:2}, label: '1°J vs 2°H' },
   { idx: 15, home: {g:'K',r:1}, away: {thirds:['D','E','I','J','L']}, label: '1°K vs Mejor 3°(D/E/I/J/L)' },
