@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 const GROUPS = ['A','B','C','D','E','F','G','H','I','J','K','L']
 const STAGES = [
   { id: 'group', label: 'Grupos', icon: '🏟️' },
+  { id: 'thirds', label: 'Terceros', icon: '📊' },
   { id: 'round_of_32', label: 'Ronda 32', icon: '⚔️' },
   { id: 'round_of_16', label: 'Octavos', icon: '🔥' },
   { id: 'quarter_final', label: 'Cuartos', icon: '💥' },
@@ -366,6 +367,58 @@ export default function AdminResultsPage() {
       )}
 
       {/* RONDA 32 */}
+      {activeStage==='thirds' && (() => {
+        const allGroups = 'ABCDEFGHIJKL'.split('')
+        const thirds = allGroups.map(g => {
+          const gm = matches.filter((m:any) => m.group_name === g && m.stage?.type === 'group')
+          const standings = calcStandings(gm, g)
+          const third = standings[2]
+          return third ? { group: g, team: third } : null
+        }).filter(Boolean)
+        const sorted = thirds.sort((a:any, b:any) => b.team.pts - a.team.pts || b.team.gd - a.team.gd || b.team.gf - a.team.gf)
+        const best8 = sorted.slice(0, 8)
+        const groupsWithThirds = best8.map((t:any) => t.group).sort().join('')
+        return (
+          <div className="space-y-3">
+            <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 rounded-2xl p-3">
+              <p className="text-xs font-bold text-blue-700 dark:text-blue-400 mb-1">📋 Grupos con mejor 3° clasificado</p>
+              <p className="text-sm font-black text-blue-900 dark:text-blue-300">{groupsWithThirds || 'Calculando...'}</p>
+              <p className="text-xs text-blue-500 mt-1">Comparar con tabla FIFA para determinar cruces en R32</p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {sorted.map((item:any, i:number) => (
+                <div key={item.group} className={`bg-white dark:bg-gray-900 border rounded-2xl p-3 ${i < 8 ? 'border-green-300 dark:border-green-500/30' : 'border-gray-200 dark:border-gray-700 opacity-50'}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`text-xs font-black px-2 py-0.5 rounded-full ${i < 8 ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>
+                      {i < 8 ? `✅ Clasifica` : '❌ No clasifica'}
+                    </span>
+                    <span className="text-xs font-bold text-gray-400">Grupo {item.group}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {item.team?.flag_url && <img src={item.team.flag_url} className="w-8 h-5 object-cover rounded"/>}
+                    <span className="font-bold text-gray-900 dark:text-white text-sm">{item.team?.short_name}</span>
+                  </div>
+                  <div className="mt-2 grid grid-cols-3 gap-1 text-center">
+                    <div>
+                      <p className="text-lg font-black text-green-600 dark:text-green-400">{item.team?.pts}</p>
+                      <p className="text-xs text-gray-400">Pts</p>
+                    </div>
+                    <div>
+                      <p className="text-lg font-black text-blue-600 dark:text-blue-400">{item.team?.gd > 0 ? '+' : ''}{item.team?.gd}</p>
+                      <p className="text-xs text-gray-400">DG</p>
+                    </div>
+                    <div>
+                      <p className="text-lg font-black text-gray-600 dark:text-gray-400">{item.team?.gf}</p>
+                      <p className="text-xs text-gray-400">GF</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
+
       {activeStage==='round_of_32' && (
         <div className="grid sm:grid-cols-2 gap-3">
           {r32WithTeams.map(({ slot, match, homeTeam, awayTeam }) => (
