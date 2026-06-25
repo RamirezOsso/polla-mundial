@@ -15,22 +15,22 @@ const STAGES = [
 
 // Cruces oficiales R32 FIFA 2026
 const R32_STRUCTURE = [
-  { mn: 101, home: {g:'A',r:2}, away: {g:'B',r:2} },
-  { mn: 102, home: {g:'C',r:1}, away: {g:'F',r:2} },
-  { mn: 103, home: {g:'E',r:1}, away: {thirds:'ABCDF'} },
-  { mn: 104, home: {g:'F',r:1}, away: {g:'C',r:2} },
-  { mn: 105, home: {g:'E',r:2}, away: {g:'I',r:2} },
-  { mn: 106, home: {g:'I',r:1}, away: {thirds:'CDFGH'} },
-  { mn: 107, home: {g:'A',r:1}, away: {thirds:'CEFHI'} },
-  { mn: 108, home: {g:'L',r:1}, away: {thirds:'EHIJK'} },
-  { mn: 109, home: {g:'G',r:1}, away: {thirds:'AEHIJ'} },
-  { mn: 110, home: {g:'D',r:1}, away: {thirds:'BEFIJ'} },
-  { mn: 111, home: {g:'H',r:1}, away: {g:'J',r:2} },
-  { mn: 112, home: {g:'K',r:2}, away: {g:'L',r:2} },
-  { mn: 113, home: {g:'B',r:1}, away: {thirds:'DEIJL'} },
-  { mn: 114, home: {g:'D',r:2}, away: {g:'G',r:2} },
-  { mn: 115, home: {g:'J',r:1}, away: {g:'H',r:2} },
-  { mn: 116, home: {g:'K',r:1}, away: {thirds:'DEIJL'} },
+  { mn: 101, home: {g:'A',r:2}, away: {g:'B',r:2}, label: '2°A vs 2°B' },
+  { mn: 102, home: {g:'C',r:1}, away: {g:'F',r:2}, label: '1°C vs 2°F' },
+  { mn: 103, home: {g:'E',r:1}, away: {thirds:'ABCDF'}, label: '1°E vs Mejor 3°(A/B/C/D/F)' },
+  { mn: 104, home: {g:'F',r:1}, away: {g:'C',r:2}, label: '1°F vs 2°C' },
+  { mn: 105, home: {g:'E',r:2}, away: {g:'I',r:2}, label: '2°E vs 2°I' },
+  { mn: 106, home: {g:'I',r:1}, away: {thirds:'CDFGH'}, label: '1°I vs Mejor 3°(C/D/F/G/H)' },
+  { mn: 107, home: {g:'A',r:1}, away: {thirds:'CEFHI'}, label: '1°A vs Mejor 3°(C/E/F/H/I)' },
+  { mn: 108, home: {g:'L',r:1}, away: {thirds:'EHIJK'}, label: '1°L vs Mejor 3°(E/H/I/J/K)' },
+  { mn: 109, home: {g:'G',r:1}, away: {thirds:'AEHIJ'}, label: '1°G vs Mejor 3°(A/E/H/I/J)' },
+  { mn: 110, home: {g:'D',r:1}, away: {thirds:'BEFIJ'}, label: '1°D vs Mejor 3°(B/E/F/I/J)' },
+  { mn: 111, home: {g:'H',r:1}, away: {g:'J',r:2}, label: '1°H vs 2°J' },
+  { mn: 112, home: {g:'K',r:2}, away: {g:'L',r:2}, label: '2°K vs 2°L' },
+  { mn: 113, home: {g:'B',r:1}, away: {thirds:'EFGIJ'}, label: '1°B vs Mejor 3°(E/F/G/I/J)' },
+  { mn: 114, home: {g:'D',r:2}, away: {g:'G',r:2}, label: '2°D vs 2°G' },
+  { mn: 115, home: {g:'J',r:1}, away: {g:'H',r:2}, label: '1°J vs 2°H' },
+  { mn: 116, home: {g:'K',r:1}, away: {thirds:'DEIJL'}, label: '1°K vs Mejor 3°(D/E/I/J/L)' },
 ]
 
 function calcStandings(groupMatches: any[], group: string) {
@@ -54,7 +54,7 @@ function isGroupComplete(groupMatches: any[], group: string) {
   return gm.length > 0 && gm.every(m => m.status === 'finished')
 }
 
-function MatchCard({ match, homeTeam, awayTeam, onSave, pending }: any) {
+function MatchCard({ match, homeTeam, awayTeam, onSave, pending, label }: any) {
   const [home, setHome] = useState<number|string>(match?.home_score ?? '')
   const [away, setAway] = useState<number|string>(match?.away_score ?? '')
   const [saving, setSaving] = useState(false)
@@ -69,6 +69,7 @@ function MatchCard({ match, homeTeam, awayTeam, onSave, pending }: any) {
   if (pending || !homeTeam || !awayTeam) {
     return (
       <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 opacity-60">
+        {label && <p className="text-xs font-bold text-gray-500 dark:text-gray-400 text-center mb-1">{label}</p>}
         <p className="text-xs text-gray-400 text-center mb-2">
           {match?.match_date && new Date(match.match_date).toLocaleString('es-CO', { timeZone:'America/Bogota', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}
         </p>
@@ -89,9 +90,12 @@ function MatchCard({ match, homeTeam, awayTeam, onSave, pending }: any) {
   return (
     <div className={`bg-white dark:bg-gray-900 border rounded-2xl p-4 ${isFinished ? 'border-green-300 dark:border-green-500/30' : 'border-gray-200 dark:border-gray-800'}`}>
       <div className="flex items-center justify-between mb-3">
-        <p className="text-xs text-gray-400">
-          {new Date(match.match_date).toLocaleString('es-CO', { timeZone:'America/Bogota', weekday:'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}
-        </p>
+        <div>
+          {label && <p className="text-xs font-bold text-blue-600 dark:text-blue-400 mb-0.5">{label}</p>}
+          <p className="text-xs text-gray-400">
+            {new Date(match.match_date).toLocaleString('es-CO', { timeZone:'America/Bogota', weekday:'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}
+          </p>
+        </div>
         {isFinished && <span className="text-xs bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 px-2 py-0.5 rounded-full font-bold">✅ Publicado</span>}
       </div>
       <div className="space-y-2">
@@ -365,7 +369,7 @@ export default function AdminResultsPage() {
       {activeStage==='round_of_32' && (
         <div className="grid sm:grid-cols-2 gap-3">
           {r32WithTeams.map(({ slot, match, homeTeam, awayTeam }) => (
-            <MatchCard key={slot.mn} match={match} homeTeam={homeTeam} awayTeam={awayTeam} onSave={handleSave} pending={!homeTeam||!awayTeam}/>
+            <MatchCard key={slot.mn} match={match} homeTeam={homeTeam} awayTeam={awayTeam} onSave={handleSave} pending={!homeTeam||!awayTeam} label={slot.label}/>
           ))}
         </div>
       )}
@@ -374,7 +378,7 @@ export default function AdminResultsPage() {
       {activeStage==='round_of_16' && (
         <div className="grid sm:grid-cols-2 gap-3">
           {r16WithTeams.map(({ match, homeTeam, awayTeam }, i) => (
-            <MatchCard key={i} match={match} homeTeam={homeTeam} awayTeam={awayTeam} onSave={handleSave} pending={!homeTeam||!awayTeam}/>
+            <MatchCard key={i} match={match} homeTeam={homeTeam} awayTeam={awayTeam} onSave={handleSave} pending={!homeTeam||!awayTeam} label={`Octavos ${i+1} · W${100+i*2+1} vs W${100+i*2+2}`}/>
           ))}
         </div>
       )}
@@ -383,7 +387,7 @@ export default function AdminResultsPage() {
       {activeStage==='quarter_final' && (
         <div className="grid sm:grid-cols-2 gap-3">
           {qfWithTeams.map(({ match, homeTeam, awayTeam }, i) => (
-            <MatchCard key={i} match={match} homeTeam={homeTeam} awayTeam={awayTeam} onSave={handleSave} pending={!homeTeam||!awayTeam}/>
+            <MatchCard key={i} match={match} homeTeam={homeTeam} awayTeam={awayTeam} onSave={handleSave} pending={!homeTeam||!awayTeam} label={`Cuartos ${i+1}`}/>
           ))}
         </div>
       )}
@@ -392,7 +396,7 @@ export default function AdminResultsPage() {
       {activeStage==='semi_final' && (
         <div className="grid sm:grid-cols-2 gap-3">
           {sfWithTeams.map(({ match, homeTeam, awayTeam }, i) => (
-            <MatchCard key={i} match={match} homeTeam={homeTeam} awayTeam={awayTeam} onSave={handleSave} pending={!homeTeam||!awayTeam}/>
+            <MatchCard key={i} match={match} homeTeam={homeTeam} awayTeam={awayTeam} onSave={handleSave} pending={!homeTeam||!awayTeam} label={`Semifinal ${i+1}`}/>
           ))}
         </div>
       )}
