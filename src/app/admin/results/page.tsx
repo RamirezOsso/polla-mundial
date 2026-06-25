@@ -212,14 +212,15 @@ export default function AdminResultsPage() {
     return thirds.sort((a,b) => b.pts-a.pts||b.gd-a.gd||b.gf-a.gf)
   }, [allStandings])
 
-  // Asignar terceros a slots
+  // Asignar terceros a slots - solo los 8 mejores clasificados
   const assignedThirds = useMemo(() => {
+    const top8 = bestThirds.slice(0, 8) // Solo los 8 mejores terceros
     const assigned = new Set<string>()
     const result: Record<string, any> = {}
     R32_STRUCTURE.forEach(slot => {
       const away = slot.away as any
       if (away.thirds) {
-        const best = bestThirds.find(t => away.thirds.includes(t.group) && !assigned.has(t.id))
+        const best = top8.find(t => away.thirds.includes(t.group) && !assigned.has(t.id))
         if (best) { assigned.add(best.id); result[`${slot.mn}_away`] = best }
       }
     })
