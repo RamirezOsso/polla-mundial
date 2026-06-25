@@ -42,10 +42,10 @@ function GroupCard({ group, matches, predictions, onClick }: any) {
     matches.forEach((m: any) => {
       if (!teams[m.home_team_id]) teams[m.home_team_id] = { ...m.home_team, pts: 0, gd: 0, gf: 0 }
       if (!teams[m.away_team_id]) teams[m.away_team_id] = { ...m.away_team, pts: 0, gd: 0, gf: 0 }
-      const isFinished = m.status === 'finished'
       const pred = predMap.get(m.id)
-      const h = isFinished ? m.home_score : pred?.home_score
-      const a = isFinished ? m.away_score : pred?.away_score
+      // SIEMPRE usar pronósticos del usuario, nunca resultados reales
+      const h = pred?.home_score
+      const a = pred?.away_score
       if (h == null || a == null) return
       teams[m.home_team_id].gf += h; teams[m.away_team_id].gf += a
       teams[m.home_team_id].gd += h - a; teams[m.away_team_id].gd += a - h
