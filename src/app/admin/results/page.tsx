@@ -227,13 +227,20 @@ export default function AdminResultsPage() {
     return result
   }, [bestThirds])
 
-  // Resolver equipos R32 desde standings
+  // Resolver equipos R32 desde standings o desde match si ya tiene equipos definidos
   const r32WithTeams = useMemo(() => {
     const r32Matches = matches.filter(m => m.stage?.type==='round_of_32').sort((a,b)=>a.match_number-b.match_number)
     return R32_STRUCTURE.map((slot, i) => {
       const match = r32Matches[i]
       const homeSpec = slot.home as any
       const awaySpec = slot.away as any
+
+      // Si el partido ya tiene equipos reales en la BD, usarlos directamente
+      const matchHasTeams = match?.home_team?.short_name !== 'TBD' && match?.away_team?.short_name !== 'TBD'
+      if (matchHasTeams) {
+        return { slot, match, homeTeam: match.home_team, awayTeam: match.away_team }
+      }
+
       const homeDone = homeSpec.g ? isGroupComplete(groupMatches, homeSpec.g) : false
       const awayDone = awaySpec.g ? isGroupComplete(groupMatches, awaySpec.g) : false
 
