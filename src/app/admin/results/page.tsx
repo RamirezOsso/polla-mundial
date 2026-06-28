@@ -236,9 +236,10 @@ export default function AdminResultsPage() {
       const awaySpec = slot.away as any
 
       // Si el partido ya tiene equipos reales en la BD, usarlos directamente
-      const matchHasTeams = match?.home_team?.short_name !== 'TBD' && match?.away_team?.short_name !== 'TBD'
+      const matchHasTeams = match?.home_team && match?.away_team && 
+        match.home_team.short_name !== 'TBD' && match.away_team.short_name !== 'TBD'
       if (matchHasTeams) {
-        return { slot, match, homeTeam: match.home_team, awayTeam: match.away_team }
+        return { slot, match, homeTeam: match.home_team ?? null, awayTeam: match.away_team ?? null }
       }
 
       const homeDone = homeSpec.g ? isGroupComplete(groupMatches, homeSpec.g) : false
