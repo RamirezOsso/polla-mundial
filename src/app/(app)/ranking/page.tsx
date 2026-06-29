@@ -403,7 +403,8 @@ export default function RankingPage() {
                                 {/* Separador */}
                                 <span className="text-gray-200 dark:text-gray-700 text-xs">|</span>
                                 {/* Pronóstico usuario */}
-                                <div className="flex items-center gap-1 flex-1 min-w-0">
+                                <div className="flex flex-col flex-1 min-w-0">
+                                  <div className="flex items-center gap-1">
                                   <span className="text-xs text-gray-400 flex-shrink-0 w-7">Pred</span>
                                   {dispHome?.flag_url && <img src={dispHome.flag_url} className="w-4 h-3 object-cover rounded flex-shrink-0"/>}
                                   <span className={`text-xs font-black ${isExact ? 'text-green-500' : isCorrect ? 'text-blue-400' : 'text-red-400'}`}>
@@ -411,17 +412,17 @@ export default function RankingPage() {
                                   </span>
                                   {dispAway?.flag_url && <img src={dispAway.flag_url} className="w-4 h-3 object-cover rounded flex-shrink-0"/>}
                                 </div>
+                                  </div>
                                 {/* Puntos */}
                                 <span className={`text-xs font-black w-8 text-right flex-shrink-0 ${pred.points_earned > 0 ? 'text-green-500' : 'text-gray-300'}`}>
                                   {pred.points_earned > 0 ? `+${pred.points_earned}` : '0'}
                                 </span>
                               </div>
-                              {/* Desglose eliminatorias */}
-                              {!isGroup && breakdown.length > 0 && (
-                                <p className="text-xs text-gray-400 mt-0.5 pl-7">
-                                  ({breakdown.join(', ')})
-                                </p>
-                              )}
+                                  {!isGroup && breakdown.length > 0 && (
+                                    <p className="text-xs text-gray-400 mt-0.5 pl-7 truncate">
+                                      {breakdown.join(' · ')}
+                                    </p>
+                                  )}
                             </div>
                           )
                         })}
