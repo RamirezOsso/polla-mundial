@@ -206,11 +206,12 @@ export default function AdminResultsPage() {
     setLoading(false)
   }
 
-  const handleSave = async (matchId: string, home: number, away: number) => {
+  const handleSave = async (matchId: string, home: number, away: number, penaltyWinnerId?: string | null) => {
     const supabase = createClient()
     await supabase.from('matches').update({
       home_score: home, away_score: away, status: 'finished',
       result_published_at: new Date().toISOString(),
+      penalty_winner_id: penaltyWinnerId || null
     }).eq('id', matchId)
     await supabase.rpc('update_points_for_match', { p_match_id: matchId })
     await loadMatches()
