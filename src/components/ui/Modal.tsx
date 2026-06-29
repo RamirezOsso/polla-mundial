@@ -21,20 +21,27 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
   const sizes = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-2xl' }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className={cn('relative w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl', sizes[size])}>
+      <div className={cn(
+        'relative w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl flex flex-col',
+        'rounded-t-3xl sm:rounded-2xl',
+        'max-h-[90vh]',
+        sizes[size]
+      )}>
+        {/* Header fijo */}
         {title && (
-          <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-800">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h2>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors p-1">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+            <h2 className="text-base font-bold text-gray-900 dark:text-white">{title}</h2>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
         )}
-        <div className="p-5">{children}</div>
+        {/* Contenido con scroll */}
+        <div className="overflow-y-auto flex-1 p-5">{children}</div>
       </div>
     </div>
   )
