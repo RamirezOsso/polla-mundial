@@ -55,17 +55,20 @@ function isGroupComplete(groupMatches: any[], group: string) {
   return gm.length > 0 && gm.every(m => m.status === 'finished')
 }
 
-function MatchCard({ match, homeTeam, awayTeam, onSave, pending, label }: any) {
+function MatchCard({ match, homeTeam, awayTeam, onSave, pending, label, isKnockout }: any) {
   const [home, setHome] = useState<number|string>(match?.home_score ?? '')
   const [away, setAway] = useState<number|string>(match?.away_score ?? '')
+  const [penaltyWinner, setPenaltyWinner] = useState<string>(match?.penalty_winner_id ?? '')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const isFinished = match?.status === 'finished'
+  const isTied = home !== '' && away !== '' && Number(home) === Number(away)
 
   useEffect(() => {
     setHome(match?.home_score ?? '')
     setAway(match?.away_score ?? '')
-  }, [match?.id, match?.home_score, match?.away_score])
+    setPenaltyWinner(match?.penalty_winner_id ?? '')
+  }, [match?.id, match?.home_score, match?.away_score, match?.penalty_winner_id])
 
   if (pending || !homeTeam || !awayTeam) {
     return (
@@ -81,8 +84,9 @@ function MatchCard({ match, homeTeam, awayTeam, onSave, pending, label }: any) {
 
   const handleSave = async () => {
     if (home === '' || away === '') return
+    if (isKnockout && isTied && !penaltyWinner) return
     setSaving(true)
-    await onSave(match.id, Number(home), Number(away))
+    await onSave(match.id, Number(home), Number(away), penaltyWinner || null)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
     setSaving(false)
@@ -116,7 +120,25 @@ function MatchCard({ match, homeTeam, awayTeam, onSave, pending, label }: any) {
             className="w-14 h-10 text-center text-xl font-black bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-green-500" placeholder="?"/>
         </div>
       </div>
-      <button onClick={handleSave} disabled={saving || home===''||away===''}
+      {/* Selector ganador en penales */}
+      {isKnockout && isTied && (
+        <div className="mt-3 bg-yellow-50 dark:bg-yellow-500/10 border border-yellow-300 dark:border-yellow-500/30 rounded-xl p-3">
+          <p className="text-xs font-bold text-yellow-700 dark:text-yellow-400 mb-2">🎯 Empate — ¿Quién ganó en penales?</p>
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={() => setPenaltyWinner(homeTeam.id)}
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all ${penaltyWinner === homeTeam.id ? 'bg-green-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'}`}>
+              {homeTeam?.flag_url && <img src={homeTeam.flag_url} className="w-5 h-3 object-cover rounded inline mr-1"/>}
+              {homeTeam?.name}
+            </button>
+            <button onClick={() => setPenaltyWinner(awayTeam.id)}
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all ${penaltyWinner === awayTeam.id ? 'bg-green-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'}`}>
+              {awayTeam?.flag_url && <img src={awayTeam.flag_url} className="w-5 h-3 object-cover rounded inline mr-1"/>}
+              {awayTeam?.name}
+            </button>
+          </div>
+        </div>
+      )}
+      <button onClick={handleSave} disabled={saving || home===''||away===''||(isKnockout && isTied && !penaltyWinner)}
         className={`mt-3 w-full py-3 font-bold rounded-xl transition-all disabled:opacity-50 ${
           saved ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 border border-green-300' :
           'bg-gradient-to-r from-green-600 to-green-500 text-white'
@@ -431,7 +453,7 @@ export default function AdminResultsPage() {
       {activeStage==='round_of_32' && (
         <div className="grid sm:grid-cols-2 gap-3">
           {r32WithTeams.map(({ slot, match, homeTeam, awayTeam }) => (
-            <MatchCard key={slot.mn} match={match} homeTeam={homeTeam} awayTeam={awayTeam} onSave={handleSave} pending={!homeTeam||!awayTeam} label={slot.label}/>
+            <MatchCard key={slot.mn} match={match} homeTeam={homeTeam} awayTeam={awayTeam} onSave={handleSave} pending={!homeTeam||!awayTeam} label={slot.label} isKnockout={true}/>
           ))}
         </div>
       )}
@@ -440,7 +462,7 @@ export default function AdminResultsPage() {
       {activeStage==='round_of_16' && (
         <div className="grid sm:grid-cols-2 gap-3">
           {r16WithTeams.map(({ match, homeTeam, awayTeam }, i) => (
-            <MatchCard key={i} match={match} homeTeam={homeTeam} awayTeam={awayTeam} onSave={handleSave} pending={!homeTeam||!awayTeam} label={`Octavos ${i+1} · W${100+i*2+1} vs W${100+i*2+2}`}/>
+            <MatchCard key={i} match={match} homeTeam={homeTeam} awayTeam={awayTeam} onSave={handleSave} pending={!homeTeam||!awayTeam} label={`Octavos ${i+1} · W${100+i*2+1} vs W${100+i*2+2}`} isKnockout={true}/>
           ))}
         </div>
       )}
@@ -449,7 +471,7 @@ export default function AdminResultsPage() {
       {activeStage==='quarter_final' && (
         <div className="grid sm:grid-cols-2 gap-3">
           {qfWithTeams.map(({ match, homeTeam, awayTeam }, i) => (
-            <MatchCard key={i} match={match} homeTeam={homeTeam} awayTeam={awayTeam} onSave={handleSave} pending={!homeTeam||!awayTeam} label={`Cuartos ${i+1}`}/>
+            <MatchCard key={i} match={match} homeTeam={homeTeam} awayTeam={awayTeam} onSave={handleSave} pending={!homeTeam||!awayTeam} label={`Cuartos ${i+1}`} isKnockout={true}/>
           ))}
         </div>
       )}
@@ -458,7 +480,7 @@ export default function AdminResultsPage() {
       {activeStage==='semi_final' && (
         <div className="grid sm:grid-cols-2 gap-3">
           {sfWithTeams.map(({ match, homeTeam, awayTeam }, i) => (
-            <MatchCard key={i} match={match} homeTeam={homeTeam} awayTeam={awayTeam} onSave={handleSave} pending={!homeTeam||!awayTeam} label={`Semifinal ${i+1}`}/>
+            <MatchCard key={i} match={match} homeTeam={homeTeam} awayTeam={awayTeam} onSave={handleSave} pending={!homeTeam||!awayTeam} label={`Semifinal ${i+1}`} isKnockout={true}/>
           ))}
         </div>
       )}
