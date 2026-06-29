@@ -21,11 +21,11 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
   const sizes = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-2xl' }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className={cn(
         'relative w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl flex flex-col',
-        'rounded-t-3xl sm:rounded-2xl',
+        'rounded-2xl',
         'max-h-[90vh]',
         sizes[size]
       )}>
