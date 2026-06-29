@@ -346,6 +346,49 @@ export default function RankingPage() {
                           const predAway = pred.pred_away_team
                           const dispHome = isGroup ? m?.home_team : predHome
                           const dispAway = isGroup ? m?.away_team : predAway
+                          // Calcular desglose para eliminatorias
+                          const stageType = m?.stage?.type
+                          const realHomeId = m?.home_team_id || m?.home_team?.id
+                          const realAwayId = m?.away_team_id || m?.away_team?.id
+                          const predHomeId = pred.home_team_id
+                          const predAwayId = pred.away_team_id
+                          const homeMatch = predHomeId && (predHomeId === realHomeId || predHomeId === realAwayId)
+                          const awayMatch = predAwayId && (predAwayId === realHomeId || predAwayId === realAwayId)
+                          const bothMatch = homeMatch && awayMatch
+                          const exactScore = bothMatch && pred.home_score === m?.home_score && pred.away_score === m?.away_score
+                          const predWinnerId = pred.home_score > pred.away_score ? predHomeId : pred.away_score > pred.home_score ? predAwayId : null
+                          const realWinnerId = m?.home_score > m?.away_score ? realHomeId : realAwayId
+                          const winnerMatch = predWinnerId && predWinnerId === realWinnerId
+
+                          const breakdown: string[] = []
+                          if (!isGroup && stageType === 'round_of_32') {
+                            if (homeMatch) breakdown.push(`${predHome?.short_name} +3`)
+                            if (awayMatch) breakdown.push(`${predAway?.short_name} +3`)
+                            if (exactScore) breakdown.push('exacto +5')
+                            if (winnerMatch) breakdown.push('avance +5')
+                          } else if (!isGroup && stageType === 'round_of_16') {
+                            if (exactScore) breakdown.push('exacto +5')
+                            if (winnerMatch) breakdown.push('avance +7')
+                          } else if (!isGroup && stageType === 'quarter_final') {
+                            if (exactScore) breakdown.push('exacto +5')
+                            if (winnerMatch) breakdown.push('avance +10')
+                          } else if (!isGroup && stageType === 'semi_final') {
+                            if (exactScore) breakdown.push('exacto +5')
+                            if (winnerMatch) breakdown.push('avance +15')
+                          } else if (!isGroup && stageType === 'third_place') {
+                            if (exactScore) breakdown.push('exacto +5')
+                            if (winnerMatch) breakdown.push('3er lugar +10')
+                            const predLoserId = pred.home_score > pred.away_score ? predAwayId : predHomeId
+                            const realLoserId = m?.home_score > m?.away_score ? realAwayId : realHomeId
+                            if (predLoserId && predLoserId === realLoserId) breakdown.push('4to lugar +8')
+                          } else if (!isGroup && stageType === 'final') {
+                            if (exactScore) breakdown.push('exacto +5')
+                            if (winnerMatch) breakdown.push('campeón +25')
+                            const predLoserId = pred.home_score > pred.away_score ? predAwayId : predHomeId
+                            const realLoserId = m?.home_score > m?.away_score ? realAwayId : realHomeId
+                            if (predLoserId && predLoserId === realLoserId) breakdown.push('subcampeón +15')
+                          }
+
                           return (
                             <div key={pred.id} className="px-3 py-2">
                               {/* Fila: Real vs Pronóstico vs Puntos */}
@@ -369,10 +412,16 @@ export default function RankingPage() {
                                   {dispAway?.flag_url && <img src={dispAway.flag_url} className="w-4 h-3 object-cover rounded flex-shrink-0"/>}
                                 </div>
                                 {/* Puntos */}
-                                <span className={`text-xs font-black w-8 text-right flex-shrink-0 ${isExact ? 'text-green-500' : isCorrect ? 'text-blue-400' : 'text-gray-300'}`}>
+                                <span className={`text-xs font-black w-8 text-right flex-shrink-0 ${pred.points_earned > 0 ? 'text-green-500' : 'text-gray-300'}`}>
                                   {pred.points_earned > 0 ? `+${pred.points_earned}` : '0'}
                                 </span>
                               </div>
+                              {/* Desglose eliminatorias */}
+                              {!isGroup && breakdown.length > 0 && (
+                                <p className="text-xs text-gray-400 mt-0.5 pl-7">
+                                  ({breakdown.join(', ')})
+                                </p>
+                              )}
                             </div>
                           )
                         })}
