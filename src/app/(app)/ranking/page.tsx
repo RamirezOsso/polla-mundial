@@ -27,6 +27,7 @@ export default function RankingPage() {
   const { user } = useAuth()
   const { ranking, count, loading } = useGlobalRanking(1)
   const [selected, setSelected] = useState<any>(null)
+  const [showPoints, setShowPoints] = useState(false)
   const [selectedPreds, setSelectedPreds] = useState<any[]>([])
   const [loadingPreds, setLoadingPreds] = useState(false)
   const [predTab, setPredTab] = useState('group')
@@ -39,119 +40,12 @@ export default function RankingPage() {
         <span className="text-sm text-gray-500">{count} participantes</span>
       </div>
 
-      {/* Sistema de puntos */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
-        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="text-sm font-black text-gray-900 dark:text-white">⭐ ¿Cómo se ganan puntos?</h3>
-        </div>
-        <div className="p-4 space-y-4">
-          <div>
-            <p className="text-xs font-black text-green-700 dark:text-green-400 mb-2">🏟️ FASE DE GRUPOS</p>
-            <div className="space-y-2">
-              <div className="bg-green-50 dark:bg-green-500/10 rounded-xl px-3 py-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">🎯 Marcador exacto</span>
-                  <span className="text-sm font-black text-green-600 dark:text-green-400">+5 pts</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-0.5">Pusiste México 2-1 y terminó 2-1 ✅</p>
-              </div>
-              <div className="bg-blue-50 dark:bg-blue-500/10 rounded-xl px-3 py-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">✅ Acertaste quién ganó o si fue empate</span>
-                  <span className="text-sm font-black text-blue-600 dark:text-blue-400">+3 pts</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-0.5">Pusiste México gana y ganó, pero con diferente marcador ✅</p>
-              </div>
-            </div>
-          </div>
-          <div>
-            <p className="text-xs font-black text-cyan-700 dark:text-cyan-400 mb-2">⚔️ RONDA DE 32</p>
-            <div className="space-y-2">
-              <div className="bg-cyan-50 dark:bg-cyan-500/10 rounded-xl px-3 py-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">⚽ Por cada equipo que pusiste y sí clasificó</span>
-                  <span className="text-sm font-black text-cyan-600 dark:text-cyan-400">+3 pts</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-0.5">Pusiste Colombia en una llave y Colombia sí clasificó → +3 pts por Colombia</p>
-              </div>
-              <div className="bg-yellow-50 dark:bg-yellow-500/10 rounded-xl px-3 py-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">🔥 Acertaste quién ganó esa llave y pasó a Octavos</span>
-                  <span className="text-sm font-black text-yellow-600 dark:text-yellow-400">+5 pts</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-0.5">Pusiste Colombia ganando y Colombia pasó a Octavos → +5 pts</p>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">🎯 Acertaste el marcador exacto de la llave</span>
-                  <span className="text-sm font-black text-gray-600 dark:text-gray-300">+5 pts</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-0.5">Solo si pusiste exactamente los mismos dos equipos que jugaron</p>
-              </div>
-            </div>
-          </div>
-          <div>
-            <p className="text-xs font-black text-orange-700 dark:text-orange-400 mb-2">🔥 OCTAVOS, CUARTOS Y SEMIS</p>
-            <div className="space-y-2">
-              <div className="bg-orange-50 dark:bg-orange-500/10 rounded-xl px-3 py-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">💥 Acertaste quién ganó en Octavos y pasó a Cuartos</span>
-                  <span className="text-sm font-black text-orange-600 dark:text-orange-400">+7 pts</span>
-                </div>
-              </div>
-              <div className="bg-purple-50 dark:bg-purple-500/10 rounded-xl px-3 py-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">⭐ Acertaste quién ganó en Cuartos y pasó a Semis</span>
-                  <span className="text-sm font-black text-purple-600 dark:text-purple-400">+10 pts</span>
-                </div>
-              </div>
-              <div className="bg-red-50 dark:bg-red-500/10 rounded-xl px-3 py-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">🌟 Acertaste quién ganó en Semis y llegó a la Final</span>
-                  <span className="text-sm font-black text-red-600 dark:text-red-400">+15 pts</span>
-                </div>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">🎯 Marcador exacto en cada llave</span>
-                  <span className="text-sm font-black text-gray-600 dark:text-gray-300">+5 pts</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-0.5">Solo si pusiste exactamente los mismos dos equipos que jugaron</p>
-              </div>
-            </div>
-          </div>
-          <div>
-            <p className="text-xs font-black text-yellow-700 dark:text-yellow-400 mb-2">🏆 TERCER LUGAR Y FINAL</p>
-            <div className="space-y-2">
-              <div className="bg-amber-50 dark:bg-amber-500/10 rounded-xl px-3 py-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">🥉 Acertaste el equipo que ganó el 3er lugar</span>
-                  <span className="text-sm font-black text-amber-600 dark:text-amber-400">+10 pts</span>
-                </div>
-              </div>
-              <div className="bg-amber-50 dark:bg-amber-500/10 rounded-xl px-3 py-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">4️⃣ Acertaste el equipo que quedó de 4to lugar</span>
-                  <span className="text-sm font-black text-amber-600 dark:text-amber-400">+8 pts</span>
-                </div>
-              </div>
-              <div className="bg-yellow-50 dark:bg-yellow-500/10 rounded-xl px-3 py-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">🥈 Acertaste el Subcampeón (perdedor de la final)</span>
-                  <span className="text-sm font-black text-yellow-600 dark:text-yellow-400">+15 pts</span>
-                </div>
-              </div>
-              <div className="bg-yellow-50 dark:bg-yellow-500/10 rounded-xl px-3 py-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">🏆 Acertaste el Campeón del Mundial</span>
-                  <span className="text-sm font-black text-yellow-500">+25 pts</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <p className="text-xs text-gray-400 mt-2">Desempate: exactos → acertados → campeón → finalistas → efectividad</p>
-      </div>
+      {/* Sistema de puntos - botón */}
+      <button onClick={() => setShowPoints(true)}
+        className="w-full flex items-center justify-between bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+        <span className="text-sm font-bold text-gray-900 dark:text-white">⭐ ¿Cómo se ganan los puntos?</span>
+        <span className="text-xs text-green-600 dark:text-green-400 font-bold">Ver →</span>
+      </button>
 
       {/* Tabla */}
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
@@ -257,6 +151,116 @@ export default function RankingPage() {
       </div>
 
       {/* Paginación */}
+
+      {/* Modal sistema de puntos */}
+      <Modal open={showPoints} onClose={() => setShowPoints(false)} title="⭐ ¿Cómo se ganan puntos?">
+        <div className="space-y-4">
+          <div>
+            <p className="text-xs font-black text-green-700 dark:text-green-400 mb-2">🏟️ FASE DE GRUPOS</p>
+            <div className="space-y-2">
+              <div className="bg-green-50 dark:bg-green-500/10 rounded-xl px-3 py-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">🎯 Marcador exacto</span>
+                  <span className="text-sm font-black text-green-600 dark:text-green-400">+5 pts</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-0.5">Pusiste México 2-1 y terminó 2-1 ✅</p>
+              </div>
+              <div className="bg-blue-50 dark:bg-blue-500/10 rounded-xl px-3 py-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">✅ Acertaste quién ganó o si fue empate</span>
+                  <span className="text-sm font-black text-blue-600 dark:text-blue-400">+3 pts</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-0.5">Pusiste México gana y ganó, pero con diferente marcador ✅</p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-black text-cyan-700 dark:text-cyan-400 mb-2">⚔️ RONDA DE 32</p>
+            <div className="space-y-2">
+              <div className="bg-cyan-50 dark:bg-cyan-500/10 rounded-xl px-3 py-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">⚽ Por cada equipo que pusiste y sí clasificó</span>
+                  <span className="text-sm font-black text-cyan-600 dark:text-cyan-400">+3 pts</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-0.5">Pusiste Colombia en una llave y Colombia sí clasificó → +3 pts por Colombia</p>
+              </div>
+              <div className="bg-yellow-50 dark:bg-yellow-500/10 rounded-xl px-3 py-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">🔥 Acertaste quién ganó esa llave y pasó a Octavos</span>
+                  <span className="text-sm font-black text-yellow-600 dark:text-yellow-400">+5 pts</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-0.5">Pusiste Colombia ganando y Colombia pasó a Octavos → +5 pts</p>
+              </div>
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">🎯 Acertaste el marcador exacto de la llave</span>
+                  <span className="text-sm font-black text-gray-600 dark:text-gray-300">+5 pts</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-0.5">Solo si pusiste exactamente los mismos dos equipos que jugaron</p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-black text-orange-700 dark:text-orange-400 mb-2">🔥 OCTAVOS, CUARTOS Y SEMIS</p>
+            <div className="space-y-2">
+              <div className="bg-orange-50 dark:bg-orange-500/10 rounded-xl px-3 py-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">💥 Acertaste quién ganó en Octavos y pasó a Cuartos</span>
+                  <span className="text-sm font-black text-orange-600 dark:text-orange-400">+7 pts</span>
+                </div>
+              </div>
+              <div className="bg-purple-50 dark:bg-purple-500/10 rounded-xl px-3 py-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">⭐ Acertaste quién ganó en Cuartos y pasó a Semis</span>
+                  <span className="text-sm font-black text-purple-600 dark:text-purple-400">+10 pts</span>
+                </div>
+              </div>
+              <div className="bg-red-50 dark:bg-red-500/10 rounded-xl px-3 py-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">🌟 Acertaste quién ganó en Semis y llegó a la Final</span>
+                  <span className="text-sm font-black text-red-600 dark:text-red-400">+15 pts</span>
+                </div>
+              </div>
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">🎯 Marcador exacto en cada llave</span>
+                  <span className="text-sm font-black text-gray-600 dark:text-gray-300">+5 pts</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-0.5">Solo si pusiste exactamente los mismos dos equipos que jugaron</p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-black text-yellow-700 dark:text-yellow-400 mb-2">🏆 TERCER LUGAR Y FINAL</p>
+            <div className="space-y-2">
+              <div className="bg-amber-50 dark:bg-amber-500/10 rounded-xl px-3 py-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">🥉 Acertaste el equipo que ganó el 3er lugar</span>
+                  <span className="text-sm font-black text-amber-600 dark:text-amber-400">+10 pts</span>
+                </div>
+              </div>
+              <div className="bg-amber-50 dark:bg-amber-500/10 rounded-xl px-3 py-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">4️⃣ Acertaste el equipo que quedó de 4to lugar</span>
+                  <span className="text-sm font-black text-amber-600 dark:text-amber-400">+8 pts</span>
+                </div>
+              </div>
+              <div className="bg-yellow-50 dark:bg-yellow-500/10 rounded-xl px-3 py-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">🥈 Acertaste el Subcampeón (perdedor de la final)</span>
+                  <span className="text-sm font-black text-yellow-600 dark:text-yellow-400">+15 pts</span>
+                </div>
+              </div>
+              <div className="bg-yellow-50 dark:bg-yellow-500/10 rounded-xl px-3 py-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">🏆 Acertaste el Campeón del Mundial</span>
+                  <span className="text-sm font-black text-yellow-500">+25 pts</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
 
       {/* Modal detalle */}
       <Modal open={!!selected} onClose={() => { setSelected(null); setSelectedPreds([]) }}
