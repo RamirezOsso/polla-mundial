@@ -86,7 +86,7 @@ export default function RankingPage() {
                     const supabase = createClient()
                     const { data } = await supabase
                       .from('predictions')
-                      .select('*, match:matches!inner(match_number, home_score, away_score, match_date, stage:stages(type), home_team:teams!home_team_id(short_name, flag_url), away_team:teams!away_team_id(short_name, flag_url)), pred_home_team:teams!home_team_id(short_name, flag_url), pred_away_team:teams!away_team_id(short_name, flag_url)')
+                      .select('*, home_team_id, away_team_id, match:matches!inner(match_number, home_score, away_score, match_date, home_team_id, away_team_id, stage:stages(type), home_team:teams!home_team_id(short_name, flag_url), away_team:teams!away_team_id(short_name, flag_url)), pred_home_team:teams!home_team_id(short_name, flag_url), pred_away_team:teams!away_team_id(short_name, flag_url)')
                       .eq('user_id', r.user_id)
                       .eq('is_calculated', true)
                     const sorted = (data ?? []).sort((a: any, b: any) => {
