@@ -472,7 +472,13 @@ export default function AdminResultsPage() {
       {activeStage==='round_of_16' && (
         <div className="grid sm:grid-cols-2 gap-3">
           {r16WithTeams.map(({ match, homeTeam, awayTeam }, i) => (
-            <MatchCard key={i} match={match} homeTeam={homeTeam} awayTeam={awayTeam} onSave={handleSave} pending={!homeTeam||!awayTeam} label={`Octavos ${i+1} · W${100+i*2+1} vs W${100+i*2+2}`} isKnockout={true}/>
+            <MatchCard key={i} match={match}
+              homeTeam={homeTeam || { name: 'Por definir', short_name: '?', flag_url: null }}
+              awayTeam={awayTeam || { name: 'Por definir', short_name: '?', flag_url: null }}
+              onSave={handleSave}
+              pending={!homeTeam && !awayTeam}
+              label={`Octavos ${i+1} · W${100+i*2+1} vs W${100+i*2+2}`}
+              isKnockout={true}/>
           ))}
         </div>
       )}
@@ -481,7 +487,13 @@ export default function AdminResultsPage() {
       {activeStage==='quarter_final' && (
         <div className="grid sm:grid-cols-2 gap-3">
           {qfWithTeams.map(({ match, homeTeam, awayTeam }, i) => (
-            <MatchCard key={i} match={match} homeTeam={homeTeam} awayTeam={awayTeam} onSave={handleSave} pending={!homeTeam||!awayTeam} label={`Cuartos ${i+1}`} isKnockout={true}/>
+            <MatchCard key={i} match={match}
+              homeTeam={homeTeam || { name: 'Por definir', short_name: '?', flag_url: null }}
+              awayTeam={awayTeam || { name: 'Por definir', short_name: '?', flag_url: null }}
+              onSave={handleSave}
+              pending={!homeTeam && !awayTeam}
+              label={`Cuartos ${i+1}`}
+              isKnockout={true}/>
           ))}
         </div>
       )}
@@ -490,7 +502,13 @@ export default function AdminResultsPage() {
       {activeStage==='semi_final' && (
         <div className="grid sm:grid-cols-2 gap-3">
           {sfWithTeams.map(({ match, homeTeam, awayTeam }, i) => (
-            <MatchCard key={i} match={match} homeTeam={homeTeam} awayTeam={awayTeam} onSave={handleSave} pending={!homeTeam||!awayTeam} label={`Semifinal ${i+1}`} isKnockout={true}/>
+            <MatchCard key={i} match={match}
+              homeTeam={homeTeam || { name: 'Por definir', short_name: '?', flag_url: null }}
+              awayTeam={awayTeam || { name: 'Por definir', short_name: '?', flag_url: null }}
+              onSave={handleSave}
+              pending={!homeTeam && !awayTeam}
+              label={`Semifinal ${i+1}`}
+              isKnockout={true}/>
           ))}
         </div>
       )}
@@ -498,14 +516,26 @@ export default function AdminResultsPage() {
       {/* TERCER LUGAR */}
       {activeStage==='third_place' && tpMatch && (
         <div className="max-w-md">
-          <MatchCard match={tpMatch} homeTeam={sfLosers[0]} awayTeam={sfLosers[1]} onSave={handleSave} pending={!sfLosers[0]||!sfLosers[1]}/>
+          <MatchCard match={tpMatch}
+            homeTeam={sfLosers[0] || { name: 'Por definir', short_name: '?', flag_url: null }}
+            awayTeam={sfLosers[1] || { name: 'Por definir', short_name: '?', flag_url: null }}
+            onSave={handleSave}
+            pending={!sfLosers[0] && !sfLosers[1]}
+            label="3er Lugar"
+            isKnockout={true}/>
         </div>
       )}
 
       {/* FINAL */}
       {activeStage==='final' && finalMatch && (
         <div className="max-w-md">
-          <MatchCard match={finalMatch} homeTeam={sfWinners[0]} awayTeam={sfWinners[1]} onSave={handleSave} pending={!sfWinners[0]||!sfWinners[1]}/>
+          <MatchCard match={finalMatch}
+            homeTeam={sfWinners[0] || { name: 'Por definir', short_name: '?', flag_url: null }}
+            awayTeam={sfWinners[1] || { name: 'Por definir', short_name: '?', flag_url: null }}
+            onSave={handleSave}
+            pending={!sfWinners[0] && !sfWinners[1]}
+            label="Final"
+            isKnockout={true}/>
         </div>
       )}
     </div>
