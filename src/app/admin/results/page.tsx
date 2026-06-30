@@ -280,6 +280,9 @@ export default function AdminResultsPage() {
   // Resolver ganadores R32 → Octavos
   const r32Winners = useMemo(() => r32WithTeams.map(({ match, homeTeam, awayTeam }) => {
     if (!match || match.status !== 'finished') return null
+    if (match.penalty_winner_id) {
+      return match.penalty_winner_id === match.home_team_id ? homeTeam : awayTeam
+    }
     return match.home_score > match.away_score ? homeTeam : awayTeam
   }), [r32WithTeams])
 
@@ -290,6 +293,9 @@ export default function AdminResultsPage() {
 
   const r16Winners = useMemo(() => r16WithTeams.map(({match,homeTeam,awayTeam}) => {
     if (!match||match.status!=='finished') return null
+    if (match.penalty_winner_id) {
+      return match.penalty_winner_id === match.home_team_id ? homeTeam : awayTeam
+    }
     return match.home_score>match.away_score?homeTeam:awayTeam
   }), [r16WithTeams])
 
@@ -300,6 +306,7 @@ export default function AdminResultsPage() {
 
   const qfWinners = useMemo(() => qfWithTeams.map(({match,homeTeam,awayTeam}) => {
     if (!match||match.status!=='finished') return null
+    if (match.penalty_winner_id) return match.penalty_winner_id === match.home_team_id ? homeTeam : awayTeam
     return match.home_score>match.away_score?homeTeam:awayTeam
   }), [qfWithTeams])
 
@@ -310,11 +317,13 @@ export default function AdminResultsPage() {
 
   const sfWinners = useMemo(() => sfWithTeams.map(({match,homeTeam,awayTeam}) => {
     if (!match||match.status!=='finished') return null
+    if (match.penalty_winner_id) return match.penalty_winner_id === match.home_team_id ? homeTeam : awayTeam
     return match.home_score>match.away_score?homeTeam:awayTeam
   }), [sfWithTeams])
 
   const sfLosers = useMemo(() => sfWithTeams.map(({match,homeTeam,awayTeam}) => {
     if (!match||match.status!=='finished') return null
+    if (match.penalty_winner_id) return match.penalty_winner_id === match.home_team_id ? awayTeam : homeTeam
     return match.home_score>match.away_score?awayTeam:homeTeam
   }), [sfWithTeams])
 
