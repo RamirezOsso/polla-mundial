@@ -502,14 +502,14 @@ export default function AdminResultsPage() {
               'Cuartos 3 · W(O5 POR/ESP) vs W(O6 USA/BEL)',
               'Cuartos 4 · W(O7 ARG) vs W(O8 COL/SUI)',
             ]
-            return <MatchCard key={i} match={match}
+            return (<MatchCard key={i} match={match}
               homeTeam={homeTeam || { name: 'Por definir', short_name: '?', flag_url: null }}
               awayTeam={awayTeam || { name: 'Por definir', short_name: '?', flag_url: null }}
               onSave={handleSave}
               pending={!homeTeam && !awayTeam}
               label={qfLabels[i] || `Cuartos ${i+1}`}
-              isKnockout={true}/>
-          )})}
+              isKnockout={true}/>)
+          })}
         </div>
       )}
 
