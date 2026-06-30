@@ -287,9 +287,18 @@ export default function AdminResultsPage() {
   }), [r32WithTeams])
 
   const r16Matches = useMemo(() => matches.filter(m=>m.stage?.type==='round_of_16').sort((a,b)=>a.match_number-b.match_number), [matches])
-  const r16WithTeams = useMemo(() => r16Matches.map((match,i) => ({
-    match, homeTeam: r32Winners[i*2]??null, awayTeam: r32Winners[i*2+1]??null
-  })), [r16Matches, r32Winners])
+  // Cruces Octavos oficiales FIFA 2026
+  // W101 vs W104 | W103 vs W106 | W102 vs W105 | W107 vs W108
+  // W112 vs W111 | W110 vs W109 | W115 vs W114 | W113 vs W116
+  const R16_PAIRS = [[0,3],[2,5],[1,4],[6,7],[11,10],[9,8],[14,13],[12,15]]
+  const r16WithTeams = useMemo(() => r16Matches.map((match,i) => {
+    const pair = R16_PAIRS[i]
+    return {
+      match,
+      homeTeam: pair ? (r32Winners[pair[0]]??null) : null,
+      awayTeam: pair ? (r32Winners[pair[1]]??null) : null
+    }
+  }), [r16Matches, r32Winners])
 
   const r16Winners = useMemo(() => r16WithTeams.map(({match,homeTeam,awayTeam}) => {
     if (!match||match.status!=='finished') return null
