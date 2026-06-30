@@ -495,30 +495,40 @@ export default function AdminResultsPage() {
       {/* CUARTOS */}
       {activeStage==='quarter_final' && (
         <div className="grid sm:grid-cols-2 gap-3">
-          {qfWithTeams.map(({ match, homeTeam, awayTeam }, i) => (
-            <MatchCard key={i} match={match}
+          {qfWithTeams.map(({ match, homeTeam, awayTeam }, i) => {
+            const qfLabels = [
+              'Cuartos 1 · W(O1 CAN) vs W(O2 PAR)',
+              'Cuartos 2 · W(O3 BRA) vs W(O4 MEX)',
+              'Cuartos 3 · W(O5 POR/ESP) vs W(O6 USA/BEL)',
+              'Cuartos 4 · W(O7 ARG) vs W(O8 COL/SUI)',
+            ]
+            return <MatchCard key={i} match={match}
               homeTeam={homeTeam || { name: 'Por definir', short_name: '?', flag_url: null }}
               awayTeam={awayTeam || { name: 'Por definir', short_name: '?', flag_url: null }}
               onSave={handleSave}
               pending={!homeTeam && !awayTeam}
-              label={`Cuartos ${i+1}`}
+              label={qfLabels[i] || `Cuartos ${i+1}`}
               isKnockout={true}/>
-          ))}
+          )})}
         </div>
       )}
 
       {/* SEMIS */}
       {activeStage==='semi_final' && (
         <div className="grid sm:grid-cols-2 gap-3">
-          {sfWithTeams.map(({ match, homeTeam, awayTeam }, i) => (
-            <MatchCard key={i} match={match}
+          {sfWithTeams.map(({ match, homeTeam, awayTeam }, i) => {
+            const sfLabels = [
+              'Semifinal 1 · W(QF1) vs W(QF2)',
+              'Semifinal 2 · W(QF3) vs W(QF4)',
+            ]
+            return <MatchCard key={i} match={match}
               homeTeam={homeTeam || { name: 'Por definir', short_name: '?', flag_url: null }}
               awayTeam={awayTeam || { name: 'Por definir', short_name: '?', flag_url: null }}
               onSave={handleSave}
               pending={!homeTeam && !awayTeam}
-              label={`Semifinal ${i+1}`}
+              label={sfLabels[i] || `Semifinal ${i+1}`}
               isKnockout={true}/>
-          ))}
+          })}
         </div>
       )}
 
