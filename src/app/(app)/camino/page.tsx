@@ -139,27 +139,20 @@ function MatchCard({ match, homeTeam, awayTeam, prediction, onSave, pts, isLocke
           <p className="text-xs text-gray-400">⏳ {pendingMsg || 'Completa la fase anterior'}</p>
         </div>
       ) : isFinished ? (
-        <div className="p-3 space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 flex-1 justify-end">
-              {homeTeam?.flag_url && <img src={homeTeam.flag_url} className="w-7 h-5 object-cover rounded"/>}
-              <span className="font-bold text-gray-900 dark:text-white text-sm">{homeTeam?.short_name}</span>
-            </div>
-            <div className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-xl text-center min-w-[70px]">
-              <span className="text-xl font-black text-gray-900 dark:text-white">{match.home_score}-{match.away_score}</span>
-            </div>
-            <div className="flex items-center gap-2 flex-1">
-              <span className="font-bold text-gray-900 dark:text-white text-sm">{awayTeam?.short_name}</span>
-              {awayTeam?.flag_url && <img src={awayTeam.flag_url} className="w-7 h-5 object-cover rounded"/>}
-            </div>
+        <div className="p-3 flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-1 justify-end">
+            {homeTeam?.flag_url && <img src={homeTeam.flag_url} className="w-7 h-5 object-cover rounded"/>}
+            <span className="font-bold text-gray-900 dark:text-white text-sm">{homeTeam?.short_name}</span>
           </div>
-          {hasPred && (
-            <div className={`text-center text-xs font-bold px-3 py-1.5 rounded-xl ${
-              prediction.points_earned === 5 ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400' :
-              prediction.points_earned >= 3 ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400' :
-              'bg-gray-100 dark:bg-gray-700 text-gray-500'
-            }`}>Mi pronóstico: {prediction.home_score}-{prediction.away_score} · +{prediction.points_earned ?? 0}pts</div>
-          )}
+          <div className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-xl min-w-[70px] text-center">
+            {hasPred
+              ? <span className="text-sm font-black text-blue-500">{prediction.home_score}-{prediction.away_score}</span>
+              : <span className="text-xs text-gray-400">Sin pred.</span>}
+          </div>
+          <div className="flex items-center gap-2 flex-1">
+            <span className="font-bold text-gray-900 dark:text-white text-sm">{awayTeam?.short_name}</span>
+            {awayTeam?.flag_url && <img src={awayTeam.flag_url} className="w-7 h-5 object-cover rounded"/>}
+          </div>
         </div>
       ) : isLocked ? (
         <div className="p-3 flex items-center gap-2">
