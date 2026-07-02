@@ -188,29 +188,34 @@ export default function DashboardPage() {
                       {m.home_team?.flag_url && <img src={m.home_team.flag_url} className="w-7 h-5 object-cover rounded"/>}
                       <span className="font-black text-gray-900 dark:text-white text-sm">{m.home_team?.short_name}</span>
                     </div>
-                    <div className="px-4 py-2 rounded-xl text-center min-w-[70px] bg-gray-100 dark:bg-gray-800">
-                      <span className="text-sm font-black text-gray-400">vs</span>
+                    <div className={`px-4 py-2 rounded-xl text-center min-w-[70px] ${isFinished ? 'bg-gray-900 dark:bg-gray-700' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                      {isFinished
+                        ? <span className="text-lg font-black text-white">{m.home_score}-{m.away_score}</span>
+                        : <span className="text-sm font-black text-gray-400">vs</span>
+                      }
                     </div>
                     <div className="flex items-center gap-2 flex-1">
                       <span className="font-black text-gray-900 dark:text-white text-sm">{m.away_team?.short_name}</span>
                       {m.away_team?.flag_url && <img src={m.away_team.flag_url} className="w-7 h-5 object-cover rounded"/>}
                     </div>
                   </div>
-                  <div className={`mt-3 rounded-xl px-3 py-2 flex items-center justify-between ${
-                    pred ? 'bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20' : 'bg-yellow-50 dark:bg-yellow-500/10'
-                  }`}>
-                    {pred ? (
-                      <>
-                        <span className="text-xs text-gray-500">Mi pronóstico:</span>
-                        <span className="font-black text-blue-600 dark:text-blue-400 text-sm">{pred.home_score}-{pred.away_score}</span>
-                      </>
-                    ) : (
-                      <div className="flex items-center justify-between w-full">
-                        <span className="text-xs text-yellow-600 dark:text-yellow-400 font-bold">⚡ Sin pronóstico</span>
-                        {!m.is_locked && <Link href="/pronosticos" className="text-xs text-green-600 dark:text-green-400 font-bold">Llenar →</Link>}
-                      </div>
-                    )}
-                  </div>
+                  {!isFinished && (
+                    <div className={`mt-3 rounded-xl px-3 py-2 flex items-center justify-between ${
+                      pred ? 'bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20' : 'bg-yellow-50 dark:bg-yellow-500/10'
+                    }`}>
+                      {pred ? (
+                        <>
+                          <span className="text-xs text-gray-500">Mi pronóstico:</span>
+                          <span className="font-black text-blue-600 dark:text-blue-400 text-sm">{pred.home_score}-{pred.away_score}</span>
+                        </>
+                      ) : (
+                        <div className="flex items-center justify-between w-full">
+                          <span className="text-xs text-yellow-600 dark:text-yellow-400 font-bold">⚡ Sin pronóstico</span>
+                          {!m.is_locked && <Link href="/pronosticos" className="text-xs text-green-600 dark:text-green-400 font-bold">Llenar →</Link>}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )
             })}
