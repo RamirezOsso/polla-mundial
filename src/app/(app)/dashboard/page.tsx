@@ -188,11 +188,8 @@ export default function DashboardPage() {
                       {m.home_team?.flag_url && <img src={m.home_team.flag_url} className="w-7 h-5 object-cover rounded"/>}
                       <span className="font-black text-gray-900 dark:text-white text-sm">{m.home_team?.short_name}</span>
                     </div>
-                    <div className={`px-4 py-2 rounded-xl text-center min-w-[70px] ${isFinished ? 'bg-gray-900 dark:bg-gray-700' : 'bg-gray-100 dark:bg-gray-800'}`}>
-                      {isFinished
-                        ? <span className="text-lg font-black text-white">{m.home_score}-{m.away_score}</span>
-                        : <span className="text-sm font-black text-gray-400">vs</span>
-                      }
+                    <div className="px-4 py-2 rounded-xl text-center min-w-[70px] bg-gray-100 dark:bg-gray-800">
+                      <span className="text-sm font-black text-gray-400">vs</span>
                     </div>
                     <div className="flex items-center gap-2 flex-1">
                       <span className="font-black text-gray-900 dark:text-white text-sm">{m.away_team?.short_name}</span>
@@ -200,25 +197,12 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div className={`mt-3 rounded-xl px-3 py-2 flex items-center justify-between ${
-                    pred ? (isFinished ? 'bg-gray-50 dark:bg-gray-800' : 'bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20') : 'bg-yellow-50 dark:bg-yellow-500/10'
+                    pred ? 'bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20' : 'bg-yellow-50 dark:bg-yellow-500/10'
                   }`}>
                     {pred ? (
                       <>
                         <span className="text-xs text-gray-500">Mi pronóstico:</span>
-                        <div className="flex items-center gap-2">
-                          <span className="font-black text-blue-600 dark:text-blue-400 text-sm">{pred.home_score}-{pred.away_score}</span>
-                          {pred.is_calculated && (
-                            <span className={`text-xs font-black px-2 py-0.5 rounded-lg ${
-                              pred.points_earned >= 5 ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400' :
-                              pred.points_earned >= 3 ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400' :
-                              'bg-gray-100 dark:bg-gray-700 text-gray-500'
-                            }`}>
-                              {pred.points_earned > 0 ? `+${pred.points_earned}` : '0'} pts
-                            </span>
-                          )}
-                          {!pred.is_calculated && isFinished && <span className="text-xs text-gray-400">Calculando...</span>}
-                          {!isFinished && <span className="text-xs text-yellow-600 dark:text-yellow-400">⏳ Pendiente</span>}
-                        </div>
+                        <span className="font-black text-blue-600 dark:text-blue-400 text-sm">{pred.home_score}-{pred.away_score}</span>
                       </>
                     ) : (
                       <div className="flex items-center justify-between w-full">
